@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#6C5CE7">
+  <title>Seno &amp; Lian Lernen 🌟</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════ RESET & VARIABLES ═══════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --de:        #6C5CE7;
+      --de-light:  #EDE7FF;
+      --en:        #00B894;
+      --en-light:  #E0F8F3;
+      --idn:       #E17055;
+      --idn-light: #FFF0ED;
+      --star:      #FDCB6E;
+      --bg:        #F0F0FF;
+      --surface:   #ffffff;
+      --text:      #2D3436;
+      --muted:     #636E72;
+      --danger:    #FF7675;
+      --radius:    16px;
+      --shadow:    0 4px 20px rgba(108,92,231,.12);
+      --nav-h:     68px;
+      --top-h:     62px;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Nunito', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ═══════════════ APP SHELL ═══════════════ */
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      height: 100dvh;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    @media (min-width: 481px) {
+      body { background: #8B7CF8; }
+      #app { box-shadow: 0 0 60px rgba(0,0,0,.25); }
+    }
+
+    /* ═══════════════ SCREENS ═══════════════ */
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+    }
+    .screen.active { display: flex; }
+
+    /* ═══════════════ PROFILE SCREEN ═══════════════ */
+    #screen-profile {
+      background: linear-gradient(150deg, #6C5CE7 0%, #A29BFE 100%);
+      align-items: center;
+      justify-content: center;
+      gap: 36px;
+      padding: 32px;
+    }
+
+    .profile-hero { text-align: center; }
+    .profile-hero .app-icon { font-size: 80px; line-height: 1; margin-bottom: 12px; }
+    .profile-hero h1 { color: #fff; font-size: 30px; font-weight: 900; }
+    .profile-hero p  { color: rgba(255,255,255,.75); font-size: 15px; margin-top: 6px; }
+
+    .profiles-row { display: flex; gap: 20px; }
+
+    .profile-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.2);
+      border: 3px solid rgba(255,255,255,.4);
+      border-radius: 24px; padding: 28px 36px;
+      cursor: pointer; color: #fff;
+      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 20px;
+      transition: transform .15s, background .15s;
+    }
+    .profile-btn:active { transform: scale(.94); background: rgba(255,255,255,.3); }
+    .profile-btn .avatar { font-size: 60px; line-height: 1; }
+
+    .profile-langs { color: rgba(255,255,255,.55); font-size: 13px; font-weight: 700; text-align: center; }
+
+    /* ═══════════════ TOP BAR ═══════════════ */
+    .top-bar {
+      height: var(--top-h);
+      background: #fff; flex-shrink: 0;
+      display: flex; align-items: center; padding: 0 14px; gap: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.06);
+      z-index: 20;
+    }
+
+    .top-profile-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg); border: none; border-radius: 20px;
+      padding: 7px 14px 7px 8px; cursor: pointer;
+      font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 15px; color: var(--text);
+    }
+    .top-profile-btn .avatar { font-size: 24px; }
+    .top-profile-btn .arrow  { color: var(--muted); font-size: 11px; }
+
+    .top-stats { display: flex; gap: 8px; margin-left: auto; }
+
+    .stat-chip {
+      display: flex; align-items: center; gap: 4px;
+      background: var(--bg); border-radius: 14px; padding: 7px 13px;
+      font-weight: 900; font-size: 14px;
+    }
+    .stat-chip.streak { color: var(--danger); }
+    .stat-chip.stars  { color: #d4a017; }
+
+    /* ═══════════════ SCROLL CONTENT ═══════════════ */
+    .content {
+      flex: 1; overflow-y: auto;
+      padding: 16px 16px calc(var(--nav-h) + 16px);
+      -webkit-overflow-scrolling: touch;
+    }
+    ::-webkit-scrollbar { display: none; }
+
+    /* ═══════════════ BOTTOM NAV ═══════════════ */
+    .bottom-nav {
+      height: var(--nav-h);
+      background: #fff; border-top: 1px solid #eee;
+      display: flex; flex-shrink: 0;
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 20;
+    }
+    .nav-btn {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px;
+      border: none; background: none; cursor: pointer;
+      color: #b2bec3; font-family: 'Nunito', sans-serif;
+      font-size: 10px; font-weight: 800; padding-bottom: env(safe-area-inset-bottom, 0);
+      transition: color .2s;
+    }
+    .nav-btn .icon { font-size: 22px; }
+    .nav-btn.active { color: var(--de); }
+
+    /* ═══════════════ CARDS ═══════════════ */
+    .card {
+      background: #fff; border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 20px; margin-bottom: 16px;
+    }
+
+    /* ═══════════════ BUTTONS ═══════════════ */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 13px 22px; border-radius: 14px; border: none;
+      font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 15px;
+      cursor: pointer; transition: transform .13s, opacity .13s;
+    }
+    .btn:active { transform: scale(.95); }
+    .btn-de      { background: var(--de); color: #fff; }
+    .btn-en      { background: var(--en); color: #fff; }
+    .btn-idn     { background: var(--idn); color: #fff; }
+    .btn-ghost   { background: var(--bg); color: var(--de); }
+    .btn-dark    { background: #2d3436; color: #fff; }
+    .btn-success { background: var(--en); color: #fff; }
+    .btn-danger  { background: var(--danger); color: #fff; }
+    .btn-block   { width: 100%; }
+    .btn-lg      { padding: 17px 28px; font-size: 18px; border-radius: 18px; }
+
+    .btn-loading { opacity: .6; pointer-events: none; }
+
+    /* ═══════════════ HOME ═══════════════ */
+    .greeting   { font-size: 23px; font-weight: 900; color: var(--de); margin-bottom: 4px; }
+    .subtitle   { font-size: 14px; color: var(--muted); margin-bottom: 18px; }
+    .sec-title  { font-size: 17px; font-weight: 900; margin: 18px 0 12px; }
+
+    .level-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, var(--de), #A29BFE);
+      color: #fff; border-radius: 20px; padding: 6px 16px;
+      font-weight: 900; font-size: 13px; margin-bottom: 14px;
+    }
+
+    .progress-label  { display: flex; justify-content: space-between; font-size: 12px; font-weight: 800; color: var(--muted); margin-bottom: 7px; }
+    .progress-bar    { height: 10px; background: var(--bg); border-radius: 5px; overflow: hidden; }
+    .progress-fill   { height: 100%; background: linear-gradient(90deg, var(--de), #A29BFE); border-radius: 5px; transition: width .5s ease; }
+
+    /* Daily card */
+    .daily-card {
+      background: linear-gradient(135deg, var(--de) 0%, #A29BFE 100%);
+      border-radius: var(--radius); padding: 24px; margin-bottom: 16px;
+    }
+    .daily-label { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,.75); margin-bottom: 10px; }
+    .daily-text  { font-size: 23px; font-weight: 900; color: #fff; line-height: 1.35; margin-bottom: 20px; }
+    .daily-row   { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    /* Sentence list items */
+    .sent-item {
+      background: #fff; border-radius: 14px; padding: 14px 16px;
+      margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
+      cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,.05);
+      transition: transform .13s;
+    }
+    .sent-item:active { transform: scale(.98); }
+    .sent-item .dot   { width: 10px; height: 10px; border-radius: 50%; background: #dfe6e9; flex-shrink: 0; }
+    .sent-item.known .dot { background: var(--en); }
+    .sent-item .body  { flex: 1; min-width: 0; }
+    .sent-item .de-t  { font-weight: 900; font-size: 15px; color: var(--de); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sent-item .en-t  { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sent-item .arrow { color: #b2bec3; font-size: 18px; flex-shrink: 0; }
+
+    /* ═══════════════ SENTENCE VIEW ═══════════════ */
+    .back-btn {
+      background: none; border: none; color: var(--de);
+      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 15px;
+      cursor: pointer; padding: 0; margin-bottom: 18px;
+    }
+
+    .lang-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .lang-tab  {
+      flex: 1; padding: 10px 6px; border: none; border-radius: 12px;
+      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 12px;
+      cursor: pointer; transition: all .2s; opacity: .45;
+    }
+    .lang-tab.active  { opacity: 1; }
+    .lang-tab.t-de    { background: var(--de-light); color: var(--de); }
+    .lang-tab.t-de.active  { background: var(--de); color: #fff; }
+    .lang-tab.t-en    { background: var(--en-light); color: var(--en); }
+    .lang-tab.t-en.active  { background: var(--en); color: #fff; }
+    .lang-tab.t-idn   { background: var(--idn-light); color: var(--idn); }
+    .lang-tab.t-idn.active { background: var(--idn); color: #fff; }
+
+    .sent-display {
+      font-size: 26px; font-weight: 900; line-height: 1.5; margin-bottom: 22px;
+    }
+    .word-token          { cursor: default; border-radius: 6px; display: inline; }
+    .word-token.clickable{
+      cursor: pointer; border-bottom: 2.5px dashed var(--de);
+      transition: background .12s;
+    }
+    .word-token.clickable:active { background: var(--de-light); color: var(--de); }
+
+    .speak-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .speak-btn {
+      flex: 1; background: var(--bg); border: none; border-radius: 13px;
+      padding: 13px 8px; font-family: 'Nunito', sans-serif;
+      font-weight: 900; font-size: 12px; cursor: pointer; transition: transform .13s;
+    }
+    .speak-btn:active { transform: scale(.95); }
+    .speak-btn.t-de  { color: var(--de); }
+    .speak-btn.t-en  { color: var(--en); }
+    .speak-btn.t-idn { color: var(--idn); }
+    .speak-btn.loading { opacity: .5; pointer-events: none; }
+
+    .trans-all    { margin-top: 4px; }
+    .trans-row    { padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
+    .trans-row:last-child { border-bottom: none; }
+    .trans-lang   { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 4px; }
+    .trans-text   { font-size: 18px; font-weight: 900; }
+
+    .known-btn {
+      width: 100%; padding: 17px; border: none; border-radius: 18px;
+      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 18px;
+      cursor: pointer; transition: transform .13s; background: var(--en); color: #fff;
+    }
+    .known-btn.is-known { background: #dfe6e9; color: var(--muted); }
+    .known-btn:active { transform: scale(.97); }
+
+    .words-panel { display: flex; flex-wrap: wrap; gap: 8px; }
+    .word-chip   {
+      background: var(--de-light); color: var(--de); border: none; border-radius: 10px;
+      padding: 8px 14px; font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 13px;
+      cursor: pointer; transition: background .13s;
+    }
+    .word-chip:active { background: var(--de); color: #fff; }
+
+    /* ═══════════════ BROWSE ═══════════════ */
+    .filter-row { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 2px; }
+    .filter-btn {
+      padding: 8px 16px; border: 2px solid #eee; background: #fff;
+      border-radius: 20px; font-family: 'Nunito', sans-serif;
+      font-weight: 800; font-size: 13px; cursor: pointer; white-space: nowrap;
+      color: var(--muted); transition: all .15s;
+    }
+    .filter-btn.active { border-color: var(--de); color: var(--de); background: var(--de-light); }
+
+    /* ═══════════════ PRACTICE ═══════════════ */
+    .prac-counter { text-align: center; font-size: 12px; font-weight: 800; color: var(--muted); margin-bottom: 12px; }
+
+    .prac-card {
+      background: #fff; border-radius: 24px; padding: 36px 24px;
+      text-align: center; box-shadow: var(--shadow); margin-bottom: 20px;
+    }
+    .prac-lang  { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: var(--de); margin-bottom: 14px; }
+    .prac-word  { font-size: 46px; font-weight: 900; margin-bottom: 8px; }
+    .prac-hint  { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+
+    .prac-answer { background: var(--bg); border-radius: 14px; padding: 18px; margin-bottom: 18px; }
+    .ans-row     { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,.05); }
+    .ans-row:last-child { border: none; padding-bottom: 0; }
+    .ans-dot     { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .ans-text    { font-size: 22px; font-weight: 900; flex: 1; }
+
+    .speak-mini {
+      width: 38px; height: 38px; border-radius: 50%; border: none;
+      background: #fff; cursor: pointer; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,.08); transition: transform .13s;
+    }
+    .speak-mini:active { transform: scale(.9); }
+
+    .prac-btns { display: flex; gap: 12px; }
+    .btn-gotit {
+      flex: 1; background: var(--en); color: #fff; border: none;
+      border-radius: 14px; padding: 16px;
+      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 16px;
+      cursor: pointer; transition: transform .13s;
+    }
+    .btn-again {
+      flex: 1; background: var(--bg); color: var(--text); border: none;
+      border-radius: 14px; padding: 16px;
+      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 16px;
+      cursor: pointer; transition: transform .13s;
+    }
+    .btn-gotit:active, .btn-again:active { transform: scale(.95); }
+
+    .prac-empty { text-align: center; padding: 60px 20px; }
+    .prac-empty .icon { font-size: 72px; margin-bottom: 16px; }
+    .prac-empty p { color: var(--muted); font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+
+    /* ═══════════════ SETTINGS ═══════════════ */
+    .set-section       { margin-bottom: 24px; }
+    .set-section-title { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin-bottom: 12px; }
+
+    .inp-group { margin-bottom: 14px; }
+    .inp-label { font-size: 13px; font-weight: 800; display: block; margin-bottom: 6px; }
+    .inp-field {
+      width: 100%; padding: 12px 16px; border: 2px solid #eee;
+      border-radius: 12px; font-family: 'Nunito', sans-serif;
+      font-size: 14px; font-weight: 700; color: var(--text);
+      outline: none; transition: border-color .2s;
+    }
+    .inp-field:focus { border-color: var(--de); }
+    .inp-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+    /* ═══════════════ IMPORT ═══════════════ */
+    .drop-zone {
+      border: 3px dashed #ddd; border-radius: 20px; padding: 48px 24px;
+      text-align: center; cursor: pointer; transition: all .2s;
+    }
+    .drop-zone:hover, .drop-zone.over { border-color: var(--de); background: var(--de-light); }
+    .drop-zone .icon { font-size: 56px; margin-bottom: 12px; }
+    .drop-zone p     { font-weight: 800; color: var(--muted); }
+
+    pre.code-sample {
+      background: var(--bg); border-radius: 10px; padding: 14px;
+      font-size: 11px; overflow-x: auto; color: var(--text); line-height: 1.6;
+    }
+
+    /* ═══════════════ WORD MODAL ═══════════════ */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.5);
+      display: none; align-items: flex-end; justify-content: center;
+      z-index: 100; padding: 0;
+    }
+    .overlay.active { display: flex; }
+
+    .modal-sheet {
+      background: #fff; border-radius: 28px 28px 0 0;
+      padding: 24px 24px 40px; width: 100%; max-width: 480px;
+      animation: slideUp .28s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+    .modal-handle {
+      width: 40px; height: 4px; background: #e0e0e0;
+      border-radius: 2px; margin: 0 auto 22px;
+    }
+    .modal-word    { font-size: 40px; font-weight: 900; color: var(--de); margin-bottom: 18px; }
+    .modal-trans   { margin-bottom: 22px; }
+    .mt-row        { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+    .mt-row:last-child { border: none; }
+    .mt-lang       { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; width: 30px; }
+    .mt-text       { flex: 1; font-size: 22px; font-weight: 900; }
+
+    /* ═══════════════ CELEBRATE MODAL ═══════════════ */
+    .celebrate-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.72);
+      display: none; align-items: center; justify-content: center;
+      z-index: 200; flex-direction: column; gap: 0; cursor: pointer;
+    }
+    .celebrate-overlay.active { display: flex; }
+    .celebrate-box { text-align: center; color: #fff; padding: 20px; }
+    .cel-emoji { font-size: 90px; animation: bounce .45s ease infinite alternate; display: block; }
+    @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.15); } }
+    .cel-title { font-size: 40px; font-weight: 900; margin-top: 14px; }
+    .cel-sub   { font-size: 18px; opacity: .88; margin-top: 8px; }
+    .cel-stars { font-size: 26px; margin-top: 12px; }
+    .cel-tap   { font-size: 13px; opacity: .6; margin-top: 22px; font-weight: 700; }
+
+    /* ═══════════════ CONFETTI ═══════════════ */
+    .confetti-p {
+      position: fixed; border-radius: 3px;
+      animation: confetti linear forwards; z-index: 300;
+    }
+    @keyframes confetti {
+      0%   { transform: translateY(-10px) rotate(0deg);   opacity: 1; }
+      100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+    }
+
+    /* ═══════════════ TOAST ═══════════════ */
+    .toast {
+      position: fixed; bottom: calc(var(--nav-h) + 14px); left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: rgba(45,52,54,.95); color: #fff;
+      padding: 11px 24px; border-radius: 22px;
+      font-weight: 800; font-size: 14px;
+      opacity: 0; transition: all .28s; z-index: 500;
+      white-space: nowrap; pointer-events: none; max-width: 90vw; text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ═══════════════ LOADING BAR ═══════════════ */
+    .loading-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--de), #A29BFE);
+      z-index: 1000; display: none;
+      animation: pulse 1.2s ease infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.45; } }
+    .loading-bar.on { display: block; }
+
+    /* ═══════════════ EMPTY STATES ═══════════════ */
+    .empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+    .empty-state .icon { font-size: 56px; margin-bottom: 10px; }
+    .empty-state p { font-weight: 700; font-size: 16px; }
+
+    /* ═══════════════ ANIMATIONS ═══════════════ */
+    .fade-in { animation: fadeIn .3s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════ MISC UTILITIES ═══════════════ */
+    .mt4 { margin-top: 4px; }
+    .mt8 { margin-top: 8px; }
+    .mt16 { margin-top: 16px; }
+    .link { color: var(--de); text-decoration: none; font-weight: 700; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="loading-bar" id="lb"></div>
+
+  <!-- ══════════════════════ PROFILE SELECT ══════════════════════ -->
+  <div id="screen-profile" class="screen active">
+    <div class="profile-hero">
+      <div class="app-icon">🌟</div>
+      <h1>Seno &amp; Lian Lernen</h1>
+      <p>Wer möchte heute lernen?</p>
+    </div>
+    <div class="profiles-row">
+      <button class="profile-btn" data-profile="seno">
+        <span class="avatar">🦁</span>
+        Seno
+      </button>
+      <button class="profile-btn" data-profile="lian">
+        <span class="avatar">🌸</span>
+        Lian
+      </button>
+    </div>
+    <div class="profile-langs">🇩🇪 Deutsch &nbsp;·&nbsp; 🇬🇧 English &nbsp;·&nbsp; 🇮🇩 Bahasa Indonesia</div>
+  </div>
+
+  <!-- ══════════════════════ MAIN APP ══════════════════════ -->
+  <div id="screen-app" class="screen">
+    <!-- Top Bar -->
+    <header class="top-bar">
+      <button class="top-profile-btn" id="top-profile-btn">
+        <span class="avatar" id="top-avatar">🦁</span>
+        <span id="top-name">Seno</span>
+        <span class="arrow">▾</span>
+      </button>
+      <div class="top-stats">
+        <div class="stat-chip streak">🔥 <span id="stat-streak">0</span></div>
+        <div class="stat-chip stars">⭐ <span id="stat-stars">0</span></div>
+      </div>
+    </header>
+
+    <!-- View Container -->
+    <div class="content" id="vc"></div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-nav="home">
+        <span class="icon">🏠</span><span>Home</span>
+      </button>
+      <button class="nav-btn" data-nav="browse">
+        <span class="icon">📚</span><span>Sätze</span>
+      </button>
+      <button class="nav-btn" data-nav="practice">
+        <span class="icon">🎯</span><span>Üben</span>
+      </button>
+      <button class="nav-btn" data-nav="settings">
+        <span class="icon">⚙️</span><span>Setup</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ══════════════════════ WORD MODAL ══════════════════════ -->
+  <div class="overlay" id="word-overlay">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-word" id="modal-word-de"></div>
+      <div class="modal-trans" id="modal-trans"></div>
+      <button class="btn btn-de btn-block" id="modal-add-btn">🎯 Dieses Wort üben</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════ CELEBRATE ══════════════════════ -->
+  <div class="celebrate-overlay" id="cel-overlay">
+    <div class="celebrate-box">
+      <span class="cel-emoji" id="cel-emoji">🎉</span>
+      <div class="cel-title" id="cel-title">Super!</div>
+      <div class="cel-sub"   id="cel-sub">Du hast einen Satz gelernt!</div>
+      <div class="cel-stars" id="cel-stars">+2 ⭐</div>
+      <div class="cel-tap">Tippe irgendwo um fortzufahren</div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════════════
+const CFG = {
+  OWNER:    'syarifmathis',
+  REPO:     'seno-lian',
+  PATH:     'data/data.json',
+  DEF_VOICE:'21m00Tcm4TlvDq8ikWAM',   // ElevenLabs Rachel (multilingual)
+  EL_MODEL: 'eleven_multilingual_v2',
+};
+
+// ══════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════
+const ST = {
+  data:        null,   // full parsed data.json
+  sha:         null,   // GitHub file SHA for updates
+  profile:     null,   // 'seno' | 'lian'
+  view:        'home', // current view
+  sentId:      null,   // current sentence ID (sentence view)
+  sentLang:    'de',   // language shown in sentence view
+  browseFilter:'all',  // 'all' | 'known' | 'learning'
+  practIdx:    0,      // current practice card index
+  audioCache:  {},     // speak text → blob URL
+  saving:      false,
+  // runtime registries (avoid escaping in HTML attributes)
+  words:       [],     // current sentence's words
+  speaks:      {},     // speakKey → text
+  wordModal:   null,   // word data shown in modal
+};
+let speakKeyIdx = 0;
+
+// ══════════════════════════════════════════════════════════════
+// SETTINGS (localStorage)
+// ══════════════════════════════════════════════════════════════
+function loadSettings() {
+  try { return JSON.parse(localStorage.getItem('sl-cfg') || '{}'); } catch { return {}; }
+}
+function saveCfg(obj) { localStorage.setItem('sl-cfg', JSON.stringify(obj)); }
+function getSetting(k, def = '') { return loadSettings()[k] ?? def; }
+function setSetting(k, v)        { const s = loadSettings(); s[k] = v; saveCfg(s); }
+
+// ══════════════════════════════════════════════════════════════
+// BASE64 (unicode-safe)
+// ══════════════════════════════════════════════════════════════
+function b64enc(str) {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p) =>
+    String.fromCharCode(parseInt(p, 16))));
+}
+function b64dec(str) {
+  return decodeURIComponent(atob(str).split('').map(c =>
+    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+}
+
+// ══════════════════════════════════════════════════════════════
+// GITHUB API
+// ══════════════════════════════════════════════════════════════
+async function ghLoad() {
+  setLoading(true);
+  // Warm-start from cache
+  const cached = localStorage.getItem('sl-cache');
+  if (cached) { try { ST.data = JSON.parse(cached); } catch {} }
+
+  try {
+    const token = getSetting('ghToken');
+    const url   = `https://api.github.com/repos/${CFG.OWNER}/${CFG.REPO}/contents/${CFG.PATH}`;
+    const hdrs  = { Accept: 'application/vnd.github.v3+json' };
+    if (token) hdrs['Authorization'] = `token ${token}`;
+
+    const res  = await fetch(url, { headers: hdrs });
+    if (!res.ok) throw new Error(`GitHub ${res.status}`);
+    const file = await res.json();
+    const json = JSON.parse(b64dec(file.content.replace(/\n/g, '')));
+    ST.data = json;
+    ST.sha  = file.sha;
+    localStorage.setItem('sl-cache', JSON.stringify(json));
+  } catch (err) {
+    console.warn('ghLoad:', err);
+    if (!ST.data) throw err;
+    showToast('📡 Offline – gespeicherte Daten werden verwendet');
+  } finally {
+    setLoading(false);
+  }
+}
+
+async function ghSave() {
+  const token = getSetting('ghToken');
+  if (!token) {
+    localStorage.setItem('sl-cache', JSON.stringify(ST.data));
+    return; // silent – no token
+  }
+  if (ST.saving) return;
+  ST.saving = true;
+  setLoading(true);
+  try {
+    const body = {
+      message: `Fortschritt [${new Date().toISOString().slice(0, 10)}]`,
+      content: b64enc(JSON.stringify(ST.data, null, 2)),
+    };
+    if (ST.sha) body.sha = ST.sha;
+    const res = await fetch(
+      `https://api.github.com/repos/${CFG.OWNER}/${CFG.REPO}/contents/${CFG.PATH}`,
+      { method:'PUT', headers:{ Authorization:`token ${token}`, 'Content-Type':'application/json' }, body:JSON.stringify(body) }
+    );
+    if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.message||`GitHub ${res.status}`); }
+    ST.sha = (await res.json()).content.sha;
+    localStorage.setItem('sl-cache', JSON.stringify(ST.data));
+    showToast('☁️ Gespeichert!');
+  } catch (err) {
+    console.warn('ghSave:', err);
+    localStorage.setItem('sl-cache', JSON.stringify(ST.data));
+    showToast('⚠️ Nicht gespeichert: ' + err.message);
+  } finally {
+    ST.saving = false;
+    setLoading(false);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// ELEVENLABS TTS
+// ══════════════════════════════════════════════════════════════
+let currentAudio = null;
+
+async function speak(text, btnEl) {
+  if (!text) return;
+  const key = getSetting('elKey');
+  if (!key) { showToast('⚠️ ElevenLabs API-Key fehlt – bitte in Setup eintragen'); return; }
+
+  const voiceId  = getSetting('voiceId', CFG.DEF_VOICE);
+  const cacheKey = voiceId + '::' + text;
+
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+
+  // Cache hit
+  if (ST.audioCache[cacheKey]) {
+    currentAudio = new Audio(ST.audioCache[cacheKey]);
+    await currentAudio.play();
+    return;
+  }
+
+  if (btnEl) { btnEl._origHTML = btnEl.innerHTML; btnEl.innerHTML = '⏳ …'; btnEl.classList.add('loading'); }
+
+  try {
+    const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+      method: 'POST',
+      headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text, model_id: CFG.EL_MODEL,
+        voice_settings: { stability:.5, similarity_boost:.75 },
+      }),
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(()=>({}));
+      throw new Error(e.detail?.message || `ElevenLabs ${res.status}`);
+    }
+    const url = URL.createObjectURL(await res.blob());
+    ST.audioCache[cacheKey] = url;
+    currentAudio = new Audio(url);
+    await currentAudio.play();
+  } catch (err) {
+    console.error('TTS:', err);
+    showToast('🔇 Fehler: ' + err.message);
+  } finally {
+    if (btnEl) { if (btnEl._origHTML) btnEl.innerHTML = btnEl._origHTML; btnEl.classList.remove('loading'); }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// DATA HELPERS
+// ══════════════════════════════════════════════════════════════
+function getProfile()    { return ST.data?.profiles?.[ST.profile]; }
+function getSentences()  { return ST.data?.sentences || []; }
+function isKnown(id)     { return getProfile()?.known?.includes(id) || false; }
+
+// Resolve Indonesian text from sentence (supports idn / id_lang / id fields)
+function getIdn(s)       { return s.idn || s.id_lang || ''; }
+
+function getDailySentence() {
+  const s = getSentences();
+  if (!s.length) return null;
+  return s[Math.floor(Date.now() / 86400000) % s.length];
+}
+
+// ══════════════════════════════════════════════════════════════
+// GAMIFICATION
+// ══════════════════════════════════════════════════════════════
+function addStars(n) {
+  const p = getProfile();
+  if (!p) return;
+  p.stars = (p.stars || 0) + n;
+  updateTopStats();
+}
+
+function checkStreak() {
+  const p = getProfile();
+  if (!p) return;
+  const today = new Date().toISOString().slice(0, 10);
+  if (p.lastVisit === today) return;
+  const diff = p.lastVisit
+    ? Math.round((new Date(today) - new Date(p.lastVisit)) / 86400000)
+    : 0;
+  p.streak = diff === 1 ? (p.streak || 0) + 1 : 1;
+  p.lastVisit = today;
+  if (p.streak > 1) showToast(`🔥 ${p.streak} Tage hintereinander! Weiter so!`);
+  updateTopStats();
+}
+
+function getLevel(stars) {
+  if (stars >= 200) return ['👑', 'König'];
+  if (stars >= 100) return ['🏆', 'Champion'];
+  if (stars >=  50) return ['🚀', 'Rakete'];
+  if (stars >=  20) return ['🌟', 'Stern'];
+  if (stars >=   5) return ['🌱', 'Sprössling'];
+  return ['🥚', 'Anfänger'];
+}
+
+function celebrate(emoji, title, sub, stars) {
+  $('cel-emoji').textContent = emoji;
+  $('cel-title').textContent = title;
+  $('cel-sub').textContent   = sub;
+  $('cel-stars').textContent = stars;
+  $('cel-overlay').classList.add('active');
+  launchConfetti();
+}
+
+function launchConfetti() {
+  const cols = ['#6C5CE7','#FDCB6E','#00B894','#E17055','#A29BFE','#FD79A8','#74B9FF'];
+  for (let i = 0; i < 70; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-p';
+    el.style.cssText = `
+      left:${Math.random()*100}vw;
+      top:-10px;
+      width:${6+Math.random()*8}px;
+      height:${6+Math.random()*8}px;
+      background:${cols[Math.floor(Math.random()*cols.length)]};
+      animation-duration:${1.4+Math.random()*1.6}s;
+      animation-delay:${Math.random()*.6}s;
+    `;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// IMPORT
+// ══════════════════════════════════════════════════════════════
+function importSentences(arr) {
+  if (!ST.data) return 0;
+  const exists = new Set(ST.data.sentences.map(s => norm(s.de)));
+  let added = 0;
+  for (const s of arr) {
+    if (!s.de) continue;
+    if (exists.has(norm(s.de))) continue;
+    s.id = 'imp' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    if (!s.words) s.words = [];
+    // normalise Indonesian field
+    if (s.id && typeof s.id === 'string' && s.id.startsWith('imp')) {
+      // already has sentenceId, keep idn
+    } else if (s.id && !s.idn) {
+      s.idn = s.id;  // treat 'id' field as Indonesian if no idn
+      delete s.id;
+      s.id = 'imp' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    }
+    ST.data.sentences.push(s);
+    exists.add(norm(s.de));
+    added++;
+  }
+  return added;
+}
+function norm(str) { return String(str||'').trim().toLowerCase(); }
+
+// ══════════════════════════════════════════════════════════════
+// ROUTING & TOP BAR
+// ══════════════════════════════════════════════════════════════
+function showView(v) {
+  ST.view = v;
+  document.querySelectorAll('.nav-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.nav === v)
+  );
+  renderView();
+  $('vc').scrollTop = 0;
+}
+
+function renderView() {
+  const c = $('vc');
+  c.innerHTML = '';
+  const p = getProfile();
+  if (!p) return;
+  switch (ST.view) {
+    case 'home':     renderHome(c, p);     break;
+    case 'sentence': renderSentence(c, p); break;
+    case 'browse':   renderBrowse(c, p);   break;
+    case 'practice': renderPractice(c, p); break;
+    case 'settings': renderSettings(c);    break;
+    case 'import':   renderImport(c);      break;
+  }
+}
+
+function updateTopStats() {
+  const p = getProfile();
+  if (!p) return;
+  $('stat-streak').textContent = p.streak || 0;
+  $('stat-stars').textContent  = p.stars  || 0;
+}
+
+// ══════════════════════════════════════════════════════════════
+// VIEW: HOME
+// ══════════════════════════════════════════════════════════════
+function renderHome(c, p) {
+  ST.speaks = {};
+  const sentences  = getSentences();
+  const knownCount = (p.known || []).length;
+  const total      = sentences.length;
+  const pct        = total > 0 ? Math.round(knownCount / total * 100) : 0;
+  const [lvlEmoji, lvlName] = getLevel(p.stars || 0);
+  const daily      = getDailySentence();
+  const wordCount  = (p.wordPractice || []).length;
+
+  const deSpeakKey = daily ? regSpeak(daily.de) : '';
+
+  c.innerHTML = `<div class="fade-in">
+    <div class="greeting">Hallo, ${h(ST.profile === 'seno' ? 'Seno' : 'Lian')}! 👋</div>
+    <div class="subtitle">Was lernst du heute?</div>
+
+    <div class="card">
+      <div class="level-badge">${lvlEmoji} ${h(lvlName)}</div>
+      <div class="progress-label"><span>Sätze gelernt</span><span>${knownCount} / ${total}</span></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+
+    ${daily ? `
+    <div class="daily-card">
+      <div class="daily-label">🌟 Heutiger Satz</div>
+      <div class="daily-text">${h(daily.de)}</div>
+      <div class="daily-row">
+        <button class="btn btn-primary" style="background:#fff;color:var(--de);"
+          data-action="open-sent" data-id="${daily.id}">📖 Lernen</button>
+        <button class="btn btn-secondary" style="background:rgba(255,255,255,.25);color:#fff;"
+          data-action="speak" data-sk="${deSpeakKey}">🔊 Anhören</button>
+      </div>
+    </div>
+    ` : `<div class="card" style="text-align:center;color:var(--muted);font-weight:700;">
+      📭 Noch keine Sätze vorhanden.<br>Importiere Sätze unter Setup!
+    </div>`}
+
+    ${wordCount > 0 ? `
+    <div class="card" style="display:flex;align-items:center;gap:14px;">
+      <span style="font-size:40px;">🎯</span>
+      <div style="flex:1;">
+        <div style="font-weight:900;font-size:16px;">${wordCount} Wörter zum Üben</div>
+        <div style="color:var(--muted);font-size:13px;">Bereit für die Lernkarten!</div>
+      </div>
+      <button class="btn btn-de" data-action="nav" data-target="practice">Los!</button>
+    </div>` : ''}
+
+    <div class="sec-title">📖 Sätze</div>
+    ${sentences.slice(0, 6).map(s => sentItem(s, p)).join('')}
+    ${total > 6 ? `<button class="btn btn-ghost btn-block" data-action="nav" data-target="browse">
+      Alle ${total} Sätze anzeigen →</button>` : ''}
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// VIEW: SENTENCE
+// ══════════════════════════════════════════════════════════════
+function renderSentence(c, p) {
+  ST.speaks = {};
+  ST.words  = [];
+  const sent = getSentences().find(s => s.id === ST.sentId);
+  if (!sent) { showView('home'); return; }
+
+  const idn    = getIdn(sent);
+  const texts  = { de: sent.de, en: sent.en, idn };
+  const shown  = texts[ST.sentLang] || sent.de;
+  const words  = sent.words || [];
+
+  ST.words = words;
+  const deSk  = regSpeak(sent.de);
+  const enSk  = regSpeak(sent.en);
+  const idnSk = regSpeak(idn);
+
+  const known = isKnown(sent.id);
+
+  // Build tokenized display
+  const tokenHtml = tokenize(shown, words, ST.sentLang);
+
+  // Build word chips
+  const chipHtml = words.length
+    ? `<div class="card"><div style="font-size:13px;font-weight:800;color:var(--muted);margin-bottom:12px;">
+        💡 Tippe auf ein Wort für die Übersetzung</div>
+        <div class="words-panel">${words.map((_, i) =>
+          `<button class="word-chip" data-action="word-chip" data-widx="${i}">${h(words[i].de)}</button>`
+        ).join('')}</div></div>`
+    : '';
+
+  c.innerHTML = `<div class="fade-in">
+    <button class="back-btn" data-action="nav" data-target="home">← Zurück</button>
+
+    <div class="lang-tabs">
+      <button class="lang-tab t-de ${ST.sentLang==='de'?'active':''}" data-action="lang" data-lang="de">🇩🇪 Deutsch</button>
+      <button class="lang-tab t-en ${ST.sentLang==='en'?'active':''}" data-action="lang" data-lang="en">🇬🇧 English</button>
+      <button class="lang-tab t-idn ${ST.sentLang==='idn'?'active':''}" data-action="lang" data-lang="idn">🇮🇩 Indonesia</button>
+    </div>
+
+    <div class="card">
+      <div class="sent-display">${tokenHtml}</div>
+
+      <div class="speak-row">
+        <button class="speak-btn t-de" data-action="speak" data-sk="${deSk}">🇩🇪 Deutsch anhören</button>
+      </div>
+      <div class="speak-row mt8">
+        <button class="speak-btn t-en" data-action="speak" data-sk="${enSk}">🇬🇧 English hören</button>
+        <button class="speak-btn t-idn" data-action="speak" data-sk="${idnSk}">🇮🇩 Indonesia hören</button>
+      </div>
+    </div>
+
+    ${chipHtml}
+
+    <div class="card trans-all">
+      <div style="font-size:12px;font-weight:900;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Alle Übersetzungen</div>
+      <div class="trans-row">
+        <div class="trans-lang" style="color:var(--de)">🇩🇪 DE</div>
+        <div class="trans-text">${h(sent.de)}</div>
+      </div>
+      <div class="trans-row">
+        <div class="trans-lang" style="color:var(--en)">🇬🇧 EN</div>
+        <div class="trans-text">${h(sent.en)}</div>
+      </div>
+      <div class="trans-row">
+        <div class="trans-lang" style="color:var(--idn)">🇮🇩 IDN</div>
+        <div class="trans-text">${h(idn || '–')}</div>
+      </div>
+    </div>
+
+    <button class="known-btn ${known?'is-known':''}" data-action="toggle-known" data-id="${sent.id}">
+      ${known ? '✓ Schon gelernt' : '⭐ Ich kann das!'}
+    </button>
+  </div>`;
+}
+
+// Tokenize sentence text for inline clickable words
+function tokenize(text, words, lang) {
+  // Build map: cleaned word in current lang → word index
+  const map = {};
+  words.forEach((w, i) => {
+    const txt = (w[lang] || w.de || '').toLowerCase().replace(/[^a-zäöüßàáâãçèéêëìíîïñòóôùúûýа-яё]/gi, '');
+    if (txt) map[txt] = i;
+  });
+
+  // Split keeping spaces
+  return text.split(/(\s+)/).map(tok => {
+    if (/^\s+$/.test(tok)) return tok;
+    const clean = tok.toLowerCase().replace(/[^a-zäöüßàáâãçèéêëìíîïñòóôùúûýа-яё]/gi, '');
+    const idx = map[clean];
+    if (idx !== undefined) {
+      return `<span class="word-token clickable" data-action="word-chip" data-widx="${idx}">${h(tok)}</span>`;
+    }
+    return `<span class="word-token">${h(tok)}</span>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════
+// VIEW: BROWSE
+// ══════════════════════════════════════════════════════════════
+function renderBrowse(c, p) {
+  const all = getSentences();
+  const known   = all.filter(s =>  (p.known||[]).includes(s.id));
+  const learning = all.filter(s => !(p.known||[]).includes(s.id));
+  const filtered = ST.browseFilter === 'known' ? known
+                 : ST.browseFilter === 'learning' ? learning
+                 : all;
+
+  c.innerHTML = `<div class="fade-in">
+    <div class="sec-title">📚 Alle Sätze</div>
+    <div class="filter-row">
+      <button class="filter-btn ${ST.browseFilter==='all'?'active':''}" data-action="filter" data-f="all">
+        Alle (${all.length})</button>
+      <button class="filter-btn ${ST.browseFilter==='learning'?'active':''}" data-action="filter" data-f="learning">
+        Lerne noch (${learning.length})</button>
+      <button class="filter-btn ${ST.browseFilter==='known'?'active':''}" data-action="filter" data-f="known">
+        Gelernt (${known.length})</button>
+    </div>
+    ${filtered.length === 0
+      ? `<div class="empty-state"><div class="icon">📭</div><p>Keine Sätze</p></div>`
+      : filtered.map(s => sentItem(s, p)).join('')}
+    <div class="mt16">
+      <button class="btn btn-ghost btn-block" data-action="nav" data-target="import">
+        📥 Neue Sätze importieren</button>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// VIEW: PRACTICE
+// ══════════════════════════════════════════════════════════════
+function renderPractice(c, p) {
+  ST.speaks = {};
+  const all = p.wordPractice || [];
+
+  if (all.length === 0) {
+    c.innerHTML = `<div class="fade-in">
+      <div class="sec-title">🎯 Wörter üben</div>
+      <div class="prac-empty">
+        <div class="icon">🌈</div>
+        <p>Noch keine Wörter zum Üben!</p>
+        <p style="font-size:14px;margin-top:6px;">Öffne einen Satz, tippe auf ein Wort<br>und füge es zur Übung hinzu.</p>
+        <button class="btn btn-de mt16" data-action="nav" data-target="browse">Sätze anschauen</button>
+      </div></div>`;
+    return;
+  }
+
+  const queue = all.filter(w => (w.learnCount || 0) < 3);
+
+  if (queue.length === 0) {
+    c.innerHTML = `<div class="fade-in">
+      <div class="sec-title">🎯 Wörter üben</div>
+      <div class="prac-empty">
+        <div class="icon">🎊</div>
+        <p>Alle ${all.length} Wörter gelernt!</p>
+        <button class="btn btn-danger mt16" data-action="reset-practice">↺ Nochmal üben</button>
+      </div></div>`;
+    return;
+  }
+
+  const idx  = Math.min(ST.practIdx, queue.length - 1);
+  const word = queue[idx];
+  const deSk  = regSpeak(word.de);
+  const enSk  = regSpeak(word.en || '');
+  const idnSk = regSpeak(word.idn || word.id || '');
+
+  c.innerHTML = `<div class="fade-in">
+    <div class="sec-title">🎯 Wörter üben</div>
+    <div class="prac-counter">${idx + 1} / ${queue.length} Wörter</div>
+
+    <div class="prac-card">
+      <div class="prac-lang">🇩🇪 Deutsches Wort</div>
+      <div class="prac-word">${h(word.de)}</div>
+      <div class="prac-hint">Was bedeutet dieses Wort?</div>
+      <button class="btn btn-ghost btn-block" id="reveal-btn" data-action="reveal">👀 Aufdecken</button>
+    </div>
+
+    <div id="prac-answer" style="display:none;">
+      <div class="prac-answer">
+        <div class="ans-row">
+          <div class="ans-dot" style="background:var(--en)"></div>
+          <div class="ans-text">${h(word.en || '–')}</div>
+          <button class="speak-mini" data-action="speak" data-sk="${enSk}">🔊</button>
+        </div>
+        <div class="ans-row">
+          <div class="ans-dot" style="background:var(--idn)"></div>
+          <div class="ans-text">${h(word.idn || word.id || '–')}</div>
+          <button class="speak-mini" data-action="speak" data-sk="${idnSk}">🔊</button>
+        </div>
+        <div class="ans-row">
+          <div class="ans-dot" style="background:var(--de)"></div>
+          <div class="ans-text">${h(word.de)}</div>
+          <button class="speak-mini" data-action="speak" data-sk="${deSk}">🔊</button>
+        </div>
+      </div>
+      <div class="prac-btns">
+        <button class="btn-again" data-action="prac-again">↻ Nochmal</button>
+        <button class="btn-gotit" data-action="prac-gotit" data-wde="${a(word.de)}">✓ Kann ich!</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// VIEW: SETTINGS
+// ══════════════════════════════════════════════════════════════
+function renderSettings(c) {
+  const s = loadSettings();
+  c.innerHTML = `<div class="fade-in">
+    <div class="sec-title">⚙️ Einstellungen</div>
+
+    <div class="set-section">
+      <div class="set-section-title">🔊 ElevenLabs Sprachausgabe</div>
+      <div class="card">
+        <div class="inp-group">
+          <label class="inp-label">API Key</label>
+          <input class="inp-field" type="password" id="el-key"
+            placeholder="sk-…  (von elevenlabs.io)" value="${a(s.elKey||'')}">
+        </div>
+        <div class="inp-group">
+          <label class="inp-label">Voice ID
+            <span style="font-weight:600;color:var(--muted)"> (Standard: Rachel)</span>
+          </label>
+          <input class="inp-field" type="text" id="el-voice"
+            placeholder="${a(CFG.DEF_VOICE)}" value="${a(s.voiceId||CFG.DEF_VOICE)}">
+          <div class="inp-hint">
+            Alle Stimmen: <a href="https://elevenlabs.io/voice-library" target="_blank" class="link">elevenlabs.io/voice-library</a>
+            — verwende eine Stimme die „eleven_multilingual_v2" unterstützt.
+          </div>
+        </div>
+        <button class="btn btn-de btn-block" data-action="test-speak">🔊 Stimme testen</button>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-section-title">☁️ GitHub Fortschritt</div>
+      <div class="card">
+        <div class="inp-group">
+          <label class="inp-label">Personal Access Token
+            <a href="https://github.com/settings/tokens/new?scopes=repo&description=SenLianLearn"
+               target="_blank" class="link" style="font-size:12px;margin-left:6px;">Token erstellen →</a>
+          </label>
+          <input class="inp-field" type="password" id="gh-token"
+            placeholder="ghp_…" value="${a(s.ghToken||'')}">
+          <div class="inp-hint">Scope: <strong>repo</strong> – damit wird dein Fortschritt in GitHub gespeichert.</div>
+        </div>
+        <button class="btn btn-dark btn-block" data-action="test-github">🔗 Verbindung testen</button>
+      </div>
+    </div>
+
+    <button class="btn btn-success btn-block btn-lg" data-action="save-settings">💾 Einstellungen speichern</button>
+
+    <div class="mt16">
+      <button class="btn btn-ghost btn-block" data-action="nav" data-target="import">📥 Sätze importieren</button>
+    </div>
+
+    <div style="margin-top:28px;text-align:center;color:var(--muted);font-size:12px;font-weight:700;line-height:2;">
+      🌟 Seno &amp; Lian Lernen v1.0<br>
+      Repo: ${CFG.OWNER}/${CFG.REPO}<br>
+      Modell: ${CFG.EL_MODEL}
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// VIEW: IMPORT
+// ══════════════════════════════════════════════════════════════
+function renderImport(c) {
+  c.innerHTML = `<div class="fade-in">
+    <button class="back-btn" data-action="nav" data-target="settings">← Zurück</button>
+    <div class="sec-title">📥 Sätze importieren</div>
+
+    <div class="card">
+      <p style="color:var(--muted);font-size:14px;font-weight:700;margin-bottom:16px;">
+        Importiere eine JSON-Datei. Bereits vorhandene Sätze (gleicher Deutsch-Text) werden übersprungen.
+      </p>
+      <div class="drop-zone" id="drop-zone">
+        <div class="icon">📂</div>
+        <p>JSON-Datei auswählen oder hierher ziehen</p>
+      </div>
+      <input type="file" id="file-in" accept=".json" style="display:none">
+    </div>
+
+    <div class="card">
+      <div style="font-weight:900;margin-bottom:10px;">📋 Erwartetes Format</div>
+      <pre class="code-sample">[
+  {
+    "de":  "Der Hund springt.",
+    "en":  "The dog jumps.",
+    "idn": "Anjing itu melompat.",
+    "words": [
+      { "de": "Hund",    "en": "dog",    "idn": "anjing"    },
+      { "de": "springt", "en": "jumps",  "idn": "melompat"  }
+    ]
+  }
+]</pre>
+      <div class="inp-hint mt8">
+        Das Feld <code>idn</code> kann auch <code>id</code> oder <code>id_lang</code> heißen.
+        Felder wie <code>category</code> und <code>difficulty</code> sind optional.
+      </div>
+    </div>
+  </div>`;
+
+  // Wire up file input and drag-and-drop after render
+  const dz  = document.getElementById('drop-zone');
+  const inp = document.getElementById('file-in');
+  dz.addEventListener('click',     () => inp.click());
+  inp.addEventListener('change',   e  => processFile(e.target.files[0]));
+  dz.addEventListener('dragover',  e  => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop',      e  => { e.preventDefault(); dz.classList.remove('over'); processFile(e.dataTransfer.files[0]); });
+}
+
+function processFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      let parsed = JSON.parse(e.target.result);
+      if (parsed.sentences) parsed = parsed.sentences;
+      if (!Array.isArray(parsed)) throw new Error('Erwartet ein Array von Sätzen');
+      const n = importSentences(parsed);
+      if (n > 0) {
+        await ghSave();
+        celebrate('📚', 'Importiert!', `${n} neue Sätze hinzugefügt!`, `+${n*2} ⭐`);
+      } else {
+        showToast('ℹ️ Keine neuen Sätze (alle schon vorhanden)');
+      }
+    } catch (err) {
+      showToast('❌ Fehler: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════════════════════════════════════════════
+// WORD MODAL
+// ══════════════════════════════════════════════════════════════
+function openWordModal(word) {
+  ST.wordModal = word;
+  $('modal-word-de').textContent = word.de || '';
+  const idn = word.idn || word.id || '';
+  const enSk  = regSpeak(word.en  || '');
+  const idnSk = regSpeak(idn);
+  const deSk  = regSpeak(word.de  || '');
+
+  $('modal-trans').innerHTML = `
+    <div class="mt-row">
+      <span class="mt-lang" style="color:var(--en)">EN</span>
+      <span class="mt-text">${h(word.en || '–')}</span>
+      <button class="speak-mini" data-action="speak" data-sk="${enSk}">🔊</button>
+    </div>
+    <div class="mt-row">
+      <span class="mt-lang" style="color:var(--idn)">IDN</span>
+      <span class="mt-text">${h(idn || '–')}</span>
+      <button class="speak-mini" data-action="speak" data-sk="${idnSk}">🔊</button>
+    </div>
+    <div class="mt-row">
+      <span class="mt-lang" style="color:var(--de)">DE</span>
+      <span class="mt-text">${h(word.de || '–')}</span>
+      <button class="speak-mini" data-action="speak" data-sk="${deSk}">🔊</button>
+    </div>`;
+
+  $('word-overlay').classList.add('active');
+}
+
+function closeWordModal() { $('word-overlay').classList.remove('active'); }
+
+function addWordToPractice() {
+  const word = ST.wordModal;
+  if (!word) return;
+  const p = getProfile();
+  if (!p) return;
+  if (!p.wordPractice) p.wordPractice = [];
+  if (p.wordPractice.find(w => w.de === word.de)) {
+    showToast('Wort ist schon in deiner Übungsliste!');
+    closeWordModal();
+    return;
+  }
+  p.wordPractice.push({ ...word, learnCount: 0 });
+  ghSave();
+  showToast('✅ Wort zur Übung hinzugefügt!');
+  closeWordModal();
+}
+
+// ══════════════════════════════════════════════════════════════
+// PROFILE
+// ══════════════════════════════════════════════════════════════
+function selectProfile(name) {
+  ST.profile = name;
+  localStorage.setItem('sl-profile', name);
+
+  const avatars = { seno: '🦁', lian: '🌸' };
+  const names   = { seno: 'Seno', lian: 'Lian' };
+  $('top-avatar').textContent = avatars[name];
+  $('top-name').textContent   = names[name];
+
+  checkStreak();
+  updateTopStats();
+
+  $('screen-profile').classList.remove('active');
+  $('screen-app').classList.add('active');
+  showView('home');
+  ghSave();
+}
+
+// ══════════════════════════════════════════════════════════════
+// EVENT DELEGATION  (single listener handles everything)
+// ══════════════════════════════════════════════════════════════
+document.addEventListener('click', e => {
+  // Profile select buttons
+  const pBtn = e.target.closest('[data-profile]');
+  if (pBtn) { selectProfile(pBtn.dataset.profile); return; }
+
+  // Back to profile select
+  if (e.target === $('top-profile-btn') || e.target.closest('#top-profile-btn')) {
+    $('screen-app').classList.remove('active');
+    $('screen-profile').classList.add('active');
+    return;
+  }
+
+  // Celebrate dismiss
+  if (e.target.closest('#cel-overlay')) { $('cel-overlay').classList.remove('active'); return; }
+
+  // Word overlay close (backdrop click)
+  if (e.target === $('word-overlay')) { closeWordModal(); return; }
+
+  // Word modal add button
+  if (e.target === $('modal-add-btn') || e.target.closest('#modal-add-btn')) {
+    addWordToPractice(); return;
+  }
+
+  // Nav buttons
+  const navBtn = e.target.closest('.nav-btn');
+  if (navBtn) { showView(navBtn.dataset.nav); return; }
+
+  // Action-based routing
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const action = el.dataset.action;
+
+  switch (action) {
+    case 'nav':
+      showView(el.dataset.target); break;
+
+    case 'open-sent':
+      ST.sentId   = el.dataset.id;
+      ST.sentLang = 'de';
+      showView('sentence'); break;
+
+    case 'speak': {
+      const text = ST.speaks[el.dataset.sk];
+      if (text) speak(text, el);
+      break;
+    }
+
+    case 'lang':
+      ST.sentLang = el.dataset.lang;
+      renderView(); break;
+
+    case 'toggle-known': {
+      const p = getProfile();
+      const id = el.dataset.id;
+      if (!p.known) p.known = [];
+      const i = p.known.indexOf(id);
+      if (i === -1) {
+        p.known.push(id);
+        addStars(3);
+        celebrate('⭐', 'Toll gemacht!', 'Satz gelernt!', '+3 ⭐');
+      } else {
+        p.known.splice(i, 1);
+        showToast('Satz aus "Gelernt" entfernt');
+      }
+      checkStreak();
+      ghSave();
+      renderView();
+      break;
+    }
+
+    case 'filter':
+      ST.browseFilter = el.dataset.f;
+      renderView(); break;
+
+    case 'word-chip': {
+      const idx = parseInt(el.dataset.widx);
+      if (!isNaN(idx) && ST.words[idx]) openWordModal(ST.words[idx]);
+      break;
+    }
+
+    case 'reveal':
+      $('reveal-btn').style.display = 'none';
+      $('prac-answer').style.display = 'block'; break;
+
+    case 'prac-gotit': {
+      const p   = getProfile();
+      const wde = el.dataset.wde;
+      const w   = p.wordPractice.find(x => x.de === wde);
+      if (w) w.learnCount = (w.learnCount || 0) + 1;
+      addStars(1);
+      if ((w?.learnCount || 0) >= 3) {
+        celebrate('🎯', 'Gelernt!', `"${wde}" kennst du jetzt!`, '+1 ⭐');
+      } else {
+        showToast('✅ Gut! +1 ⭐');
+      }
+      ST.practIdx = (ST.practIdx + 1) % Math.max(1, (p.wordPractice||[]).filter(x=>(x.learnCount||0)<3).length);
+      ghSave();
+      renderView(); break;
+    }
+
+    case 'prac-again':
+      ST.practIdx = (ST.practIdx + 1) % Math.max(1, (getProfile()?.wordPractice||[]).filter(x=>(x.learnCount||0)<3).length);
+      renderView(); break;
+
+    case 'reset-practice': {
+      const p = getProfile();
+      (p.wordPractice||[]).forEach(w => { w.learnCount = 0; });
+      ST.practIdx = 0;
+      ghSave(); renderView(); break;
+    }
+
+    case 'test-speak':
+      saveSettingsFromForm();
+      speak('Hallo! Ich bin dein Sprachassistent. Lass uns zusammen Deutsch, Englisch und Indonesisch lernen!', el);
+      break;
+
+    case 'test-github':
+      saveSettingsFromForm();
+      ghLoad().then(() => { showToast('✅ GitHub verbunden!'); renderView(); })
+              .catch(err => showToast('❌ ' + err.message));
+      break;
+
+    case 'save-settings':
+      saveSettingsFromForm();
+      showToast('✅ Einstellungen gespeichert!');
+      break;
+  }
+});
+
+// ══════════════════════════════════════════════════════════════
+// SETTINGS FORM
+// ══════════════════════════════════════════════════════════════
+function saveSettingsFromForm() {
+  const elKey   = document.getElementById('el-key');
+  const elVoice = document.getElementById('el-voice');
+  const ghToken = document.getElementById('gh-token');
+  if (elKey)   setSetting('elKey',   elKey.value.trim());
+  if (elVoice) setSetting('voiceId', elVoice.value.trim() || CFG.DEF_VOICE);
+  if (ghToken) setSetting('ghToken', ghToken.value.trim());
+}
+
+// ══════════════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════════════
+function $(id)    { return document.getElementById(id); }
+function h(str)   { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function a(str)   { return String(str||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
+function regSpeak(text) {
+  const k = 'sk' + (speakKeyIdx++);
+  ST.speaks[k] = text;
+  return k;
+}
+
+function sentItem(s, p) {
+  const known = (p.known||[]).includes(s.id);
+  return `<div class="sent-item ${known?'known':''}" data-action="open-sent" data-id="${s.id}">
+    <div class="dot"></div>
+    <div class="body">
+      <div class="de-t">${h(s.de)}</div>
+      <div class="en-t">${h(s.en)}</div>
+    </div>
+    <span class="arrow">›</span>
+  </div>`;
+}
+
+function setLoading(on) { $('lb').classList.toggle('on', on); }
+
+let toastT = null;
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// INITIALISE
+// ══════════════════════════════════════════════════════════════
+async function init() {
+  try {
+    await ghLoad();
+  } catch (err) {
+    console.error('Init load failed:', err);
+    showToast('⚠️ Daten konnten nicht geladen werden – bitte GitHub-Token prüfen');
+  }
+
+  // Ensure data structure exists
+  if (!ST.data) {
+    ST.data = { sentences: [], profiles: { seno: makeProfile(), lian: makeProfile() } };
+  }
+  if (!ST.data.profiles)        ST.data.profiles = {};
+  if (!ST.data.profiles.seno)   ST.data.profiles.seno = makeProfile();
+  if (!ST.data.profiles.lian)   ST.data.profiles.lian = makeProfile();
+
+  // Auto-login last profile
+  const last = localStorage.getItem('sl-profile');
+  if (last === 'seno' || last === 'lian') {
+    selectProfile(last);
+  }
+}
+
+function makeProfile() {
+  return { stars: 0, streak: 0, lastVisit: null, known: [], wordPractice: [] };
+}
+
+init();
+</script>
+</body>
+</html>
