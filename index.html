@@ -693,6 +693,7 @@ async function speak(text, btnEl) {
       body: JSON.stringify({
         text, model_id: CFG.EL_MODEL,
         voice_settings: { stability:.5, similarity_boost:.75 },
+        speed: parseFloat(getSetting('speed', '0.85')),
       }),
     });
     if (!res.ok) {
@@ -1139,7 +1140,25 @@ function renderSettings(c) {
             — verwende eine Stimme die „eleven_multilingual_v2" unterstützt.
           </div>
         </div>
-        <button class="btn btn-de btn-block" data-action="test-speak">🔊 Stimme testen</button>
+        <div class="inp-group">
+          <label class="inp-label">🐢 Sprachgeschwindigkeit
+            <span style="font-weight:600;color:var(--muted)"> (langsamer = besser für Kinder)</span>
+          </label>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:18px;">🐢</span>
+            <input type="range" id="el-speed"
+              min="0.5" max="1.2" step="0.05"
+              value="${a(s.speed||'0.85')}"
+              style="flex:1;accent-color:var(--de);"
+              oninput="document.getElementById('speed-val').textContent=parseFloat(this.value).toFixed(2)">
+            <span style="font-size:18px;">🐇</span>
+          </div>
+          <div style="text-align:center;font-weight:900;color:var(--de);font-size:15px;margin-top:6px;">
+            <span id="speed-val">${parseFloat(s.speed||0.85).toFixed(2)}</span>x
+          </div>
+          <div class="inp-hint">0.50 = sehr langsam &nbsp;·&nbsp; 0.85 = Standard (empfohlen) &nbsp;·&nbsp; 1.20 = schnell</div>
+        </div>
+        <button class="btn btn-de btn-block" data-action="test-speak">🔊 Stimme &amp; Geschwindigkeit testen</button>
       </div>
     </div>
 
@@ -1442,6 +1461,7 @@ document.addEventListener('click', e => {
 
     case 'save-settings':
       saveSettingsFromForm();
+      ST.audioCache = {}; // clear cache so new speed/voice applies immediately
       showToast('✅ Einstellungen gespeichert!');
       break;
   }
@@ -1457,6 +1477,8 @@ function saveSettingsFromForm() {
   if (elKey)   setSetting('elKey',   elKey.value.trim());
   if (elVoice) setSetting('voiceId', elVoice.value.trim() || CFG.DEF_VOICE);
   if (ghToken) setSetting('ghToken', ghToken.value.trim());
+  const elSpeed = document.getElementById('el-speed');
+  if (elSpeed)  setSetting('speed', elSpeed.value);
 }
 
 // ══════════════════════════════════════════════════════════════
