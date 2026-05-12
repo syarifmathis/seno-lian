@@ -693,6 +693,7 @@ async function speak(text, btnEl) {
   // Cache hit
   if (ST.audioCache[cacheKey]) {
     currentAudio = new Audio(ST.audioCache[cacheKey]);
+    currentAudio.playbackRate = parseFloat(getSetting('speed', '0.85'));
     await currentAudio.play();
     return;
   }
@@ -706,7 +707,6 @@ async function speak(text, btnEl) {
       body: JSON.stringify({
         text, model_id: CFG.EL_MODEL,
         voice_settings: { stability:.5, similarity_boost:.75 },
-        speed: parseFloat(getSetting('speed', '0.85')),
       }),
     });
     if (!res.ok) {
@@ -716,6 +716,7 @@ async function speak(text, btnEl) {
     const url = URL.createObjectURL(await res.blob());
     ST.audioCache[cacheKey] = url;
     currentAudio = new Audio(url);
+    currentAudio.playbackRate = parseFloat(getSetting('speed', '0.85'));
     await currentAudio.play();
   } catch (err) {
     console.error('TTS:', err);
