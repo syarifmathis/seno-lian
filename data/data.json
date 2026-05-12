@@ -8,11 +8,31 @@
       "category": "greetings",
       "difficulty": 1,
       "words": [
-        { "de": "Guten", "en": "Good", "idn": "Bagus" },
-        { "de": "Morgen", "en": "Morning", "idn": "Pagi" },
-        { "de": "Wie", "en": "How", "idn": "Bagaimana" },
-        { "de": "geht", "en": "goes / is", "idn": "pergi / ada" },
-        { "de": "dir", "en": "you", "idn": "kamu" }
+        {
+          "de": "Guten",
+          "en": "Good",
+          "idn": "Bagus"
+        },
+        {
+          "de": "Morgen",
+          "en": "Morning",
+          "idn": "Pagi"
+        },
+        {
+          "de": "Wie",
+          "en": "How",
+          "idn": "Bagaimana"
+        },
+        {
+          "de": "geht",
+          "en": "goes / is",
+          "idn": "pergi / ada"
+        },
+        {
+          "de": "dir",
+          "en": "you",
+          "idn": "kamu"
+        }
       ]
     },
     {
@@ -23,10 +43,26 @@
       "category": "greetings",
       "difficulty": 1,
       "words": [
-        { "de": "Guten", "en": "Good", "idn": "Bagus" },
-        { "de": "Abend", "en": "Evening", "idn": "Malam" },
-        { "de": "Schlaf", "en": "Sleep", "idn": "Tidur" },
-        { "de": "gut", "en": "well / good", "idn": "baik" }
+        {
+          "de": "Guten",
+          "en": "Good",
+          "idn": "Bagus"
+        },
+        {
+          "de": "Abend",
+          "en": "Evening",
+          "idn": "Malam"
+        },
+        {
+          "de": "Schlaf",
+          "en": "Sleep",
+          "idn": "Tidur"
+        },
+        {
+          "de": "gut",
+          "en": "well / good",
+          "idn": "baik"
+        }
       ]
     },
     {
@@ -37,9 +73,21 @@
       "category": "greetings",
       "difficulty": 1,
       "words": [
-        { "de": "Tschüss", "en": "Goodbye", "idn": "Sampai jumpa" },
-        { "de": "Bis", "en": "Until / See you", "idn": "Sampai" },
-        { "de": "morgen", "en": "tomorrow", "idn": "besok" }
+        {
+          "de": "Tschüss",
+          "en": "Goodbye",
+          "idn": "Sampai jumpa"
+        },
+        {
+          "de": "Bis",
+          "en": "Until / See you",
+          "idn": "Sampai"
+        },
+        {
+          "de": "morgen",
+          "en": "tomorrow",
+          "idn": "besok"
+        }
       ]
     },
     {
@@ -50,9 +98,21 @@
       "category": "greetings",
       "difficulty": 1,
       "words": [
-        { "de": "Bitte", "en": "Please", "idn": "Tolong" },
-        { "de": "danke", "en": "Thank you", "idn": "Terima kasih" },
-        { "de": "schön", "en": "beautiful / very", "idn": "indah / sekali" }
+        {
+          "de": "Bitte",
+          "en": "Please",
+          "idn": "Tolong"
+        },
+        {
+          "de": "danke",
+          "en": "Thank you",
+          "idn": "Terima kasih"
+        },
+        {
+          "de": "schön",
+          "en": "beautiful / very",
+          "idn": "indah / sekali"
+        }
       ]
     },
     {
@@ -63,11 +123,31 @@
       "category": "greetings",
       "difficulty": 1,
       "words": [
-        { "de": "Ich", "en": "I", "idn": "Saya" },
-        { "de": "heiße", "en": "am named", "idn": "bernama" },
-        { "de": "Wie", "en": "How / What", "idn": "Bagaimana / Apa" },
-        { "de": "heißt", "en": "is named", "idn": "bernama" },
-        { "de": "du", "en": "you", "idn": "kamu" }
+        {
+          "de": "Ich",
+          "en": "I",
+          "idn": "Saya"
+        },
+        {
+          "de": "heiße",
+          "en": "am named",
+          "idn": "bernama"
+        },
+        {
+          "de": "Wie",
+          "en": "How / What",
+          "idn": "Bagaimana / Apa"
+        },
+        {
+          "de": "heißt",
+          "en": "is named",
+          "idn": "bernama"
+        },
+        {
+          "de": "du",
+          "en": "you",
+          "idn": "kamu"
+        }
       ]
     },
     {
@@ -78,10 +158,26 @@
       "category": "colors",
       "difficulty": 1,
       "words": [
-        { "de": "Das", "en": "This / That", "idn": "Ini / Itu" },
-        { "de": "ist", "en": "is", "idn": "adalah" },
-        { "de": "rot", "en": "red", "idn": "merah" },
-        { "de": "blau", "en": "blue", "idn": "biru" }
+        {
+          "de": "Das",
+          "en": "This / That",
+          "idn": "Ini / Itu"
+        },
+        {
+          "de": "ist",
+          "en": "is",
+          "idn": "adalah"
+        },
+        {
+          "de": "rot",
+          "en": "red",
+          "idn": "merah"
+        },
+        {
+          "de": "blau",
+          "en": "blue",
+          "idn": "biru"
+        }
       ]
     },
     {
@@ -92,10 +188,26 @@
       "category": "colors",
       "difficulty": 2,
       "words": [
-        { "de": "Gelb", "en": "Yellow", "idn": "Kuning" },
-        { "de": "Sonne", "en": "Sun", "idn": "Matahari" },
-        { "de": "grün", "en": "Green", "idn": "Hijau" },
-        { "de": "Gras", "en": "Grass", "idn": "Rumput" }
+        {
+          "de": "Gelb",
+          "en": "Yellow",
+          "idn": "Kuning"
+        },
+        {
+          "de": "Sonne",
+          "en": "Sun",
+          "idn": "Matahari"
+        },
+        {
+          "de": "grün",
+          "en": "Green",
+          "idn": "Hijau"
+        },
+        {
+          "de": "Gras",
+          "en": "Grass",
+          "idn": "Rumput"
+        }
       ]
     },
     {
@@ -106,9 +218,21 @@
       "category": "colors",
       "difficulty": 2,
       "words": [
-        { "de": "Mein", "en": "My", "idn": "Milikku" },
-        { "de": "Lieblingsfarbe", "en": "Favorite color", "idn": "Warna favorit" },
-        { "de": "lila", "en": "purple", "idn": "ungu" }
+        {
+          "de": "Mein",
+          "en": "My",
+          "idn": "Milikku"
+        },
+        {
+          "de": "Lieblingsfarbe",
+          "en": "Favorite color",
+          "idn": "Warna favorit"
+        },
+        {
+          "de": "lila",
+          "en": "purple",
+          "idn": "ungu"
+        }
       ]
     },
     {
@@ -119,11 +243,31 @@
       "category": "numbers",
       "difficulty": 1,
       "words": [
-        { "de": "Eins", "en": "One", "idn": "Satu" },
-        { "de": "zwei", "en": "Two", "idn": "Dua" },
-        { "de": "drei", "en": "Three", "idn": "Tiga" },
-        { "de": "vier", "en": "Four", "idn": "Empat" },
-        { "de": "fünf", "en": "Five", "idn": "Lima" }
+        {
+          "de": "Eins",
+          "en": "One",
+          "idn": "Satu"
+        },
+        {
+          "de": "zwei",
+          "en": "Two",
+          "idn": "Dua"
+        },
+        {
+          "de": "drei",
+          "en": "Three",
+          "idn": "Tiga"
+        },
+        {
+          "de": "vier",
+          "en": "Four",
+          "idn": "Empat"
+        },
+        {
+          "de": "fünf",
+          "en": "Five",
+          "idn": "Lima"
+        }
       ]
     },
     {
@@ -134,11 +278,31 @@
       "category": "numbers",
       "difficulty": 1,
       "words": [
-        { "de": "Sechs", "en": "Six", "idn": "Enam" },
-        { "de": "sieben", "en": "Seven", "idn": "Tujuh" },
-        { "de": "acht", "en": "Eight", "idn": "Delapan" },
-        { "de": "neun", "en": "Nine", "idn": "Sembilan" },
-        { "de": "zehn", "en": "Ten", "idn": "Sepuluh" }
+        {
+          "de": "Sechs",
+          "en": "Six",
+          "idn": "Enam"
+        },
+        {
+          "de": "sieben",
+          "en": "Seven",
+          "idn": "Tujuh"
+        },
+        {
+          "de": "acht",
+          "en": "Eight",
+          "idn": "Delapan"
+        },
+        {
+          "de": "neun",
+          "en": "Nine",
+          "idn": "Sembilan"
+        },
+        {
+          "de": "zehn",
+          "en": "Ten",
+          "idn": "Sepuluh"
+        }
       ]
     },
     {
@@ -149,9 +313,21 @@
       "category": "animals",
       "difficulty": 1,
       "words": [
-        { "de": "Hund", "en": "Dog", "idn": "Anjing" },
-        { "de": "bellt", "en": "barks", "idn": "menggonggong" },
-        { "de": "laut", "en": "loudly / loud", "idn": "keras" }
+        {
+          "de": "Hund",
+          "en": "Dog",
+          "idn": "Anjing"
+        },
+        {
+          "de": "bellt",
+          "en": "barks",
+          "idn": "menggonggong"
+        },
+        {
+          "de": "laut",
+          "en": "loudly / loud",
+          "idn": "keras"
+        }
       ]
     },
     {
@@ -162,9 +338,21 @@
       "category": "animals",
       "difficulty": 2,
       "words": [
-        { "de": "Katze", "en": "Cat", "idn": "Kucing" },
-        { "de": "schläft", "en": "sleeps", "idn": "tidur" },
-        { "de": "Sofa", "en": "Sofa", "idn": "Sofa" }
+        {
+          "de": "Katze",
+          "en": "Cat",
+          "idn": "Kucing"
+        },
+        {
+          "de": "schläft",
+          "en": "sleeps",
+          "idn": "tidur"
+        },
+        {
+          "de": "Sofa",
+          "en": "Sofa",
+          "idn": "Sofa"
+        }
       ]
     },
     {
@@ -175,10 +363,26 @@
       "category": "animals",
       "difficulty": 2,
       "words": [
-        { "de": "Vogel", "en": "Bird", "idn": "Burung" },
-        { "de": "singt", "en": "sings", "idn": "bernyanyi" },
-        { "de": "Lied", "en": "Song", "idn": "Lagu" },
-        { "de": "schönes", "en": "beautiful", "idn": "indah" }
+        {
+          "de": "Vogel",
+          "en": "Bird",
+          "idn": "Burung"
+        },
+        {
+          "de": "singt",
+          "en": "sings",
+          "idn": "bernyanyi"
+        },
+        {
+          "de": "Lied",
+          "en": "Song",
+          "idn": "Lagu"
+        },
+        {
+          "de": "schönes",
+          "en": "beautiful",
+          "idn": "indah"
+        }
       ]
     },
     {
@@ -189,9 +393,21 @@
       "category": "animals",
       "difficulty": 1,
       "words": [
-        { "de": "Elefant", "en": "Elephant", "idn": "Gajah" },
-        { "de": "sehr", "en": "very", "idn": "sangat" },
-        { "de": "groß", "en": "big / tall", "idn": "besar / tinggi" }
+        {
+          "de": "Elefant",
+          "en": "Elephant",
+          "idn": "Gajah"
+        },
+        {
+          "de": "sehr",
+          "en": "very",
+          "idn": "sangat"
+        },
+        {
+          "de": "groß",
+          "en": "big / tall",
+          "idn": "besar / tinggi"
+        }
       ]
     },
     {
@@ -202,9 +418,21 @@
       "category": "animals",
       "difficulty": 3,
       "words": [
-        { "de": "Pferd", "en": "Horse", "idn": "Kuda" },
-        { "de": "galoppiert", "en": "gallops", "idn": "berlari / berderap" },
-        { "de": "Wiese", "en": "Meadow", "idn": "Padang rumput" }
+        {
+          "de": "Pferd",
+          "en": "Horse",
+          "idn": "Kuda"
+        },
+        {
+          "de": "galoppiert",
+          "en": "gallops",
+          "idn": "berlari / berderap"
+        },
+        {
+          "de": "Wiese",
+          "en": "Meadow",
+          "idn": "Padang rumput"
+        }
       ]
     },
     {
@@ -215,10 +443,26 @@
       "category": "food",
       "difficulty": 1,
       "words": [
-        { "de": "Ich", "en": "I", "idn": "Saya" },
-        { "de": "esse", "en": "eat", "idn": "makan" },
-        { "de": "Apfel", "en": "Apple", "idn": "Apel" },
-        { "de": "lecker", "en": "delicious / tasty", "idn": "enak / lezat" }
+        {
+          "de": "Ich",
+          "en": "I",
+          "idn": "Saya"
+        },
+        {
+          "de": "esse",
+          "en": "eat",
+          "idn": "makan"
+        },
+        {
+          "de": "Apfel",
+          "en": "Apple",
+          "idn": "Apel"
+        },
+        {
+          "de": "lecker",
+          "en": "delicious / tasty",
+          "idn": "enak / lezat"
+        }
       ]
     },
     {
@@ -229,9 +473,21 @@
       "category": "food",
       "difficulty": 1,
       "words": [
-        { "de": "trinke", "en": "drink", "idn": "minum" },
-        { "de": "gerne", "en": "gladly / like to", "idn": "dengan senang hati / suka" },
-        { "de": "Milch", "en": "Milk", "idn": "Susu" }
+        {
+          "de": "trinke",
+          "en": "drink",
+          "idn": "minum"
+        },
+        {
+          "de": "gerne",
+          "en": "gladly / like to",
+          "idn": "dengan senang hati / suka"
+        },
+        {
+          "de": "Milch",
+          "en": "Milk",
+          "idn": "Susu"
+        }
       ]
     },
     {
@@ -242,9 +498,21 @@
       "category": "food",
       "difficulty": 2,
       "words": [
-        { "de": "Banane", "en": "Banana", "idn": "Pisang" },
-        { "de": "gelb", "en": "yellow", "idn": "kuning" },
-        { "de": "süß", "en": "sweet", "idn": "manis" }
+        {
+          "de": "Banane",
+          "en": "Banana",
+          "idn": "Pisang"
+        },
+        {
+          "de": "gelb",
+          "en": "yellow",
+          "idn": "kuning"
+        },
+        {
+          "de": "süß",
+          "en": "sweet",
+          "idn": "manis"
+        }
       ]
     },
     {
@@ -255,9 +523,21 @@
       "category": "family",
       "difficulty": 1,
       "words": [
-        { "de": "meine", "en": "my", "idn": "milikku" },
-        { "de": "Mama", "en": "Mom", "idn": "Mama" },
-        { "de": "lieb", "en": "kind / dear", "idn": "baik hati / sayang" }
+        {
+          "de": "meine",
+          "en": "my",
+          "idn": "milikku"
+        },
+        {
+          "de": "Mama",
+          "en": "Mom",
+          "idn": "Mama"
+        },
+        {
+          "de": "lieb",
+          "en": "kind / dear",
+          "idn": "baik hati / sayang"
+        }
       ]
     },
     {
@@ -268,9 +548,21 @@
       "category": "family",
       "difficulty": 1,
       "words": [
-        { "de": "mein", "en": "my", "idn": "milikku" },
-        { "de": "Papa", "en": "Dad", "idn": "Papa" },
-        { "de": "stark", "en": "strong", "idn": "kuat" }
+        {
+          "de": "mein",
+          "en": "my",
+          "idn": "milikku"
+        },
+        {
+          "de": "Papa",
+          "en": "Dad",
+          "idn": "Papa"
+        },
+        {
+          "de": "stark",
+          "en": "strong",
+          "idn": "kuat"
+        }
       ]
     },
     {
@@ -281,10 +573,26 @@
       "category": "activities",
       "difficulty": 2,
       "words": [
-        { "de": "Wir", "en": "We", "idn": "Kita" },
-        { "de": "spielen", "en": "play", "idn": "bermain" },
-        { "de": "zusammen", "en": "together", "idn": "bersama" },
-        { "de": "Spaß", "en": "Fun", "idn": "Kesenangan / Seru" }
+        {
+          "de": "Wir",
+          "en": "We",
+          "idn": "Kita"
+        },
+        {
+          "de": "spielen",
+          "en": "play",
+          "idn": "bermain"
+        },
+        {
+          "de": "zusammen",
+          "en": "together",
+          "idn": "bersama"
+        },
+        {
+          "de": "Spaß",
+          "en": "Fun",
+          "idn": "Kesenangan / Seru"
+        }
       ]
     },
     {
@@ -295,9 +603,21 @@
       "category": "activities",
       "difficulty": 1,
       "words": [
-        { "de": "schlafe", "en": "sleep", "idn": "tidur" },
-        { "de": "jetzt", "en": "now", "idn": "sekarang" },
-        { "de": "Nacht", "en": "Night", "idn": "Malam" }
+        {
+          "de": "schlafe",
+          "en": "sleep",
+          "idn": "tidur"
+        },
+        {
+          "de": "jetzt",
+          "en": "now",
+          "idn": "sekarang"
+        },
+        {
+          "de": "Nacht",
+          "en": "Night",
+          "idn": "Malam"
+        }
       ]
     },
     {
@@ -308,9 +628,21 @@
       "category": "weather",
       "difficulty": 2,
       "words": [
-        { "de": "Sonne", "en": "Sun", "idn": "Matahari" },
-        { "de": "scheint", "en": "shines", "idn": "bersinar" },
-        { "de": "warm", "en": "warm", "idn": "hangat" }
+        {
+          "de": "Sonne",
+          "en": "Sun",
+          "idn": "Matahari"
+        },
+        {
+          "de": "scheint",
+          "en": "shines",
+          "idn": "bersinar"
+        },
+        {
+          "de": "warm",
+          "en": "warm",
+          "idn": "hangat"
+        }
       ]
     },
     {
@@ -321,9 +653,21 @@
       "category": "weather",
       "difficulty": 3,
       "words": [
-        { "de": "regnet", "en": "rains / is raining", "idn": "hujan" },
-        { "de": "heute", "en": "today", "idn": "hari ini" },
-        { "de": "Regenschirm", "en": "Umbrella", "idn": "Payung" }
+        {
+          "de": "regnet",
+          "en": "rains / is raining",
+          "idn": "hujan"
+        },
+        {
+          "de": "heute",
+          "en": "today",
+          "idn": "hari ini"
+        },
+        {
+          "de": "Regenschirm",
+          "en": "Umbrella",
+          "idn": "Payung"
+        }
       ]
     },
     {
@@ -334,10 +678,26 @@
       "category": "love",
       "difficulty": 1,
       "words": [
-        { "de": "Ich", "en": "I", "idn": "Aku" },
-        { "de": "liebe", "en": "love", "idn": "sayang / cinta" },
-        { "de": "dich", "en": "you", "idn": "kamu" },
-        { "de": "toll", "en": "amazing / great", "idn": "luar biasa / keren" }
+        {
+          "de": "Ich",
+          "en": "I",
+          "idn": "Aku"
+        },
+        {
+          "de": "liebe",
+          "en": "love",
+          "idn": "sayang / cinta"
+        },
+        {
+          "de": "dich",
+          "en": "you",
+          "idn": "kamu"
+        },
+        {
+          "de": "toll",
+          "en": "amazing / great",
+          "idn": "luar biasa / keren"
+        }
       ]
     }
   ],
@@ -345,8 +705,8 @@
     "seno": {
       "avatar": "🦁",
       "stars": 0,
-      "streak": 0,
-      "lastVisit": null,
+      "streak": 1,
+      "lastVisit": "2026-05-12",
       "known": [],
       "wordPractice": []
     },
