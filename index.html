@@ -1611,39 +1611,76 @@ function startListening(lang, expectedText, btnEl) {
     return;
   }
 
-  // Stop any previous session
-  if (activeRec) { try { activeRec.abort(); } catch {} activeRec = null; }
+  // If already listening, tapping again = manual stop → immediate result
+  if (activeRec) {
+    try { activeRec.stop(); } catch {}
+    return;
+  }
 
   const rec = new SR();
   rec.lang            = LANG_CODES[lang] || 'de-DE';
-  rec.interimResults  = false;
+  rec.interimResults  = true;   // stream partial results live for instant display
   rec.maxAlternatives = 5;
   rec.continuous      = false;
   activeRec = rec;
 
-  if (btnEl) { btnEl.classList.add('listening'); btnEl.innerHTML = '🔴 Zuhören…'; }
+  // Track best transcript in closure — avoids fragile DOM scraping
+  let bestTranscript = '';
+  let bestScore      = -1;
+
+  // Button becomes a tap-to-stop button while listening
+  if (btnEl) {
+    btnEl.classList.add('listening');
+    btnEl.innerHTML = '✅ Fertig! (tippe zum Stoppen)';
+  }
+
+  const fbDiv = document.getElementById('listen-feedback');
 
   rec.onresult = e => {
-    // Pick best alternative that gives highest score
-    let bestScore = -1, bestTranscript = '';
-    for (let i = 0; i < e.results[0].length; i++) {
-      const t = e.results[0][i].transcript;
-      const s = scoreText(t, expectedText);
-      if (s > bestScore) { bestScore = s; bestTranscript = t; }
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t   = e.results[i][0].transcript;
+      const fin = e.results[i].isFinal;
+      if (fin) {
+        // Score all alternatives, keep the best
+        for (let j = 0; j < e.results[i].length; j++) {
+          const alt = e.results[i][j].transcript;
+          const sc  = scoreText(alt, expectedText);
+          if (sc > bestScore) { bestScore = sc; bestTranscript = alt; }
+        }
+      } else {
+        interim += t;
+      }
     }
-    showListenFeedback(bestScore, bestTranscript, lang);
-    activeRec = null;
+    // Show live preview while speaking
+    const preview = bestTranscript || interim;
+    if (fbDiv && preview) {
+      fbDiv.innerHTML = `<div style="background:var(--bg);border-radius:10px;padding:12px;
+        font-size:15px;font-weight:800;color:var(--muted);text-align:center;margin-top:12px;">
+        🎤 &ldquo;${h(preview)}&rdquo;</div>`;
+    }
   };
 
+  // Fire as soon as speech stops — cuts 2-3 s of silence wait to ~0
+  rec.onspeechend = () => { try { rec.stop(); } catch {} };
+
   rec.onerror = e => {
-    if (e.error === 'no-speech')   showToast('🎤 Kein Ton gehört – nochmal versuchen');
+    if (e.error === 'no-speech')        showToast('🎤 Kein Ton gehört – nochmal versuchen');
     else if (e.error === 'not-allowed') showToast('🎤 Mikrofon-Zugriff verweigert – bitte in den Browser-Einstellungen erlauben');
-    else showToast('🎤 Fehler: ' + e.error);
+    else if (e.error !== 'aborted')     showToast('🎤 Fehler: ' + e.error);
     restoreMicBtn(btnEl, lang);
     activeRec = null;
   };
 
-  rec.onend = () => { restoreMicBtn(btnEl, lang); activeRec = null; };
+  rec.onend = () => {
+    restoreMicBtn(btnEl, lang);
+    activeRec = null;
+    if (bestTranscript) {
+      showListenFeedback(bestScore, bestTranscript, lang);
+    } else if (fbDiv) {
+      fbDiv.innerHTML = ''; // nothing heard — clear preview
+    }
+  };
 
   try { rec.start(); } catch (err) { showToast('🎤 ' + err.message); restoreMicBtn(btnEl, lang); }
 }
