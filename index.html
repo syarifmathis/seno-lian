@@ -273,6 +273,46 @@
     .speak-btn.t-idn { color: var(--idn); }
     .speak-btn.loading { opacity: .5; pointer-events: none; }
 
+    /* ═══════════════ MIC / SPEECH ═══════════════ */
+    .mic-section-title {
+      font-size: 12px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--muted); margin-bottom: 12px;
+    }
+    .mic-btn {
+      width: 100%; padding: 15px 12px; border: 2.5px dashed #ddd;
+      border-radius: 14px; background: #fff;
+      font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 15px;
+      cursor: pointer; transition: all .2s; color: var(--muted);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .mic-btn:active { transform: scale(.96); }
+    .mic-btn.listening {
+      border-color: var(--danger); border-style: solid;
+      color: var(--danger); background: #fff5f5;
+      animation: micPulse 1s ease infinite;
+    }
+    @keyframes micPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(255,118,117,.5); }
+      50%      { box-shadow: 0 0 0 14px rgba(255,118,117,0); }
+    }
+    .mic-row { display: flex; gap: 8px; margin-top: 8px; }
+    .mic-row .mic-btn { font-size: 13px; padding: 12px 8px; }
+
+    .feedback-card {
+      background: var(--bg); border-radius: 14px; padding: 20px;
+      text-align: center; margin-top: 14px; animation: fadeIn .35s ease;
+    }
+    .fb-emoji  { font-size: 52px; line-height: 1; margin-bottom: 8px; }
+    .fb-msg    { font-size: 20px; font-weight: 900; margin-bottom: 10px; }
+    .fb-pct    { font-size: 36px; font-weight: 900; }
+    .fb-pct-lbl{ font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .fb-heard  {
+      background: #fff; border-radius: 10px; padding: 10px 14px;
+      font-size: 13px; color: var(--muted); font-weight: 700; text-align: left; margin-bottom: 10px;
+    }
+    .fb-heard strong { color: var(--text); }
+    .fb-stars  { font-size: 16px; font-weight: 900; color: #d4a017; }
+
     .trans-all    { margin-top: 4px; }
     .trans-row    { padding: 10px 0; border-bottom: 1px solid #f5f5f5; }
     .trans-row:last-child { border-bottom: none; }
@@ -976,6 +1016,22 @@ function renderSentence(c, p) {
       </div>
     </div>
 
+    <div class="card" id="mic-card">
+      <div class="mic-section-title">🎤 Jetzt nachsprechen</div>
+      <button class="mic-btn" data-action="listen" data-lang="de" data-sk="${deSk}">
+        🎤 Auf Deutsch nachsprechen
+      </button>
+      <div class="mic-row">
+        <button class="mic-btn" data-action="listen" data-lang="en" data-sk="${enSk}">
+          🎤 English
+        </button>
+        <button class="mic-btn" data-action="listen" data-lang="idn" data-sk="${idnSk}">
+          🎤 Indonesia
+        </button>
+      </div>
+      <div id="listen-feedback"></div>
+    </div>
+
     ${chipHtml}
 
     <div class="card trans-all">
@@ -1451,6 +1507,13 @@ document.addEventListener('click', e => {
       renderView(); break;
     }
 
+    case 'listen': {
+      const lang = el.dataset.lang;
+      const text = ST.speaks[el.dataset.sk];
+      if (text) startListening(lang, text, el);
+      break;
+    }
+
     case 'prac-again':
       ST.practIdx = (ST.practIdx + 1) % Math.max(1, (getProfile()?.wordPractice||[]).filter(x=>(x.learnCount||0)<3).length);
       renderView(); break;
@@ -1528,6 +1591,111 @@ function showToast(msg) {
   t.classList.add('show');
   clearTimeout(toastT);
   toastT = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ══════════════════════════════════════════════════════════════
+// SPEECH RECOGNITION (Web Speech API — free, no key needed)
+// ══════════════════════════════════════════════════════════════
+const LANG_CODES = { de: 'de-DE', en: 'en-US', idn: 'id-ID' };
+const MIC_LABELS = {
+  de:  '🎤 Auf Deutsch nachsprechen',
+  en:  '🎤 English speak',
+  idn: '🎤 Indonesia berbicara',
+};
+let activeRec = null;
+
+function startListening(lang, expectedText, btnEl) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    showToast('🎤 Spracherkennung wird von diesem Browser nicht unterstützt (Chrome / Safari empfohlen)');
+    return;
+  }
+
+  // Stop any previous session
+  if (activeRec) { try { activeRec.abort(); } catch {} activeRec = null; }
+
+  const rec = new SR();
+  rec.lang            = LANG_CODES[lang] || 'de-DE';
+  rec.interimResults  = false;
+  rec.maxAlternatives = 5;
+  rec.continuous      = false;
+  activeRec = rec;
+
+  if (btnEl) { btnEl.classList.add('listening'); btnEl.innerHTML = '🔴 Zuhören…'; }
+
+  rec.onresult = e => {
+    // Pick best alternative that gives highest score
+    let bestScore = -1, bestTranscript = '';
+    for (let i = 0; i < e.results[0].length; i++) {
+      const t = e.results[0][i].transcript;
+      const s = scoreText(t, expectedText);
+      if (s > bestScore) { bestScore = s; bestTranscript = t; }
+    }
+    showListenFeedback(bestScore, bestTranscript, lang);
+    activeRec = null;
+  };
+
+  rec.onerror = e => {
+    if (e.error === 'no-speech')   showToast('🎤 Kein Ton gehört – nochmal versuchen');
+    else if (e.error === 'not-allowed') showToast('🎤 Mikrofon-Zugriff verweigert – bitte in den Browser-Einstellungen erlauben');
+    else showToast('🎤 Fehler: ' + e.error);
+    restoreMicBtn(btnEl, lang);
+    activeRec = null;
+  };
+
+  rec.onend = () => { restoreMicBtn(btnEl, lang); activeRec = null; };
+
+  try { rec.start(); } catch (err) { showToast('🎤 ' + err.message); restoreMicBtn(btnEl, lang); }
+}
+
+function restoreMicBtn(btnEl, lang) {
+  if (!btnEl) return;
+  btnEl.classList.remove('listening');
+  btnEl.innerHTML = MIC_LABELS[lang] || '🎤 Nachsprechen';
+}
+
+function scoreText(heard, expected) {
+  // Normalise: lowercase, strip punctuation, split to words
+  const norm = s => s.toLowerCase()
+    .replace(/[^\p{L}\s]/gu, '').trim().split(/\s+/).filter(Boolean);
+
+  const hw = norm(heard);
+  const ew = norm(expected);
+  if (!ew.length) return 0;
+
+  let matches = 0;
+  const used = new Set();
+  for (const w of hw) {
+    for (let i = 0; i < ew.length; i++) {
+      if (!used.has(i) && ew[i] === w) { matches++; used.add(i); break; }
+    }
+  }
+  return Math.round(matches / ew.length * 100);
+}
+
+function showListenFeedback(score, heard, lang) {
+  const fb = document.getElementById('listen-feedback');
+  if (!fb) return;
+
+  let emoji, msg, stars, color;
+  if      (score >= 90) { emoji='🌟'; msg='Perfekt! Wunderbar!';      stars=3; color='#d4a017'; }
+  else if (score >= 70) { emoji='😊'; msg='Fast perfekt! Sehr gut!';  stars=2; color=ST.profile==='seno'?'#FF6B6B':'#A29BFE'; }
+  else if (score >= 45) { emoji='👍'; msg='Gut gemacht! Nochmal?';    stars=1; color='var(--de)'; }
+  else                  { emoji='💪'; msg='Weiter üben! Du schaffst das!'; stars=0; color='var(--muted)'; }
+
+  if (stars > 0) { addStars(stars); updateTopStats(); ghSave(); }
+
+  fb.innerHTML = `
+    <div class="feedback-card">
+      <div class="fb-emoji">${emoji}</div>
+      <div class="fb-msg">${msg}</div>
+      <div class="fb-pct" style="color:${color}">${score}%</div>
+      <div class="fb-pct-lbl">Übereinstimmung</div>
+      ${heard ? `<div class="fb-heard">🎤 Gehört: <strong>${h(heard)}</strong></div>` : ''}
+      ${stars > 0 ? `<div class="fb-stars">+${stars} ⭐ verdient!</div>` : ''}
+    </div>`;
+
+  if (score >= 90) setTimeout(launchConfetti, 300);
 }
 
 // ══════════════════════════════════════════════════════════════
