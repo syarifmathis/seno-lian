@@ -704,10 +704,12 @@
   "profiles": {
     "seno": {
       "avatar": "🦁",
-      "stars": 1,
-      "streak": 2,
-      "lastVisit": "2026-05-13",
-      "known": [],
+      "stars": 9,
+      "streak": 1,
+      "lastVisit": "2026-05-15",
+      "known": [
+        "s001"
+      ],
       "wordPractice": []
     },
     "lian": {
