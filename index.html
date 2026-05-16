@@ -1233,6 +1233,41 @@ function renderSettings(c) {
     </div>
 
     <div class="set-section">
+      <div class="set-section-title">🎤 Azure Aussprache-Bewertung
+        <span style="background:#00B894;color:#fff;font-size:10px;font-weight:900;
+          padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;">NEU</span>
+      </div>
+      <div class="card">
+        <p style="color:var(--muted);font-size:13px;font-weight:700;margin-bottom:14px;">
+          Mit einem Azure Speech Key bekommst du echte Aussprache-Bewertung inklusive
+          🎵 Intonation, ⚡ Flüssigkeit und 🎯 Genauigkeit – kostenlos bis 5 Std./Monat.
+        </p>
+        <div class="inp-group">
+          <label class="inp-label">Azure Speech Key
+            <a href="https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices"
+               target="_blank" class="link" style="font-size:12px;margin-left:6px;">Key erstellen →</a>
+          </label>
+          <input class="inp-field" type="password" id="az-key"
+            placeholder="Dein Azure Speech Key" value="${a(s.azKey||'')}">
+          <div class="inp-hint">
+            Kostenloses Azure-Konto: <a href="https://azure.microsoft.com/free/" target="_blank" class="link">azure.microsoft.com/free</a>
+            &nbsp;·&nbsp; Ressource: <strong>Speech Service (F0)</strong>
+          </div>
+        </div>
+        <div class="inp-group">
+          <label class="inp-label">Region</label>
+          <input class="inp-field" type="text" id="az-region"
+            placeholder="z.B. westeurope oder eastus" value="${a(s.azRegion||'')}">
+          <div class="inp-hint">Die Region deiner Azure Speech-Ressource (z.B. <code>westeurope</code>, <code>eastus</code>)</div>
+        </div>
+        <div class="inp-hint" style="background:var(--en-light);border-radius:10px;padding:10px;color:var(--text);">
+          💡 Ohne Azure-Key läuft die Sprachbewertung weiter mit dem Browser (Web Speech API) —
+          dann gibt es nur die Wort-Übereinstimmung ohne Intonation.
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
       <div class="set-section-title">☁️ GitHub Fortschritt</div>
       <div class="card">
         <div class="inp-group">
@@ -1551,9 +1586,13 @@ function saveSettingsFromForm() {
   const elKey   = document.getElementById('el-key');
   const elVoice = document.getElementById('el-voice');
   const ghToken = document.getElementById('gh-token');
-  if (elKey)   setSetting('elKey',   elKey.value.trim());
-  if (elVoice) setSetting('voiceId', elVoice.value.trim() || CFG.DEF_VOICE);
-  if (ghToken) setSetting('ghToken', ghToken.value.trim());
+  const azKey   = document.getElementById('az-key');
+  const azRegion= document.getElementById('az-region');
+  if (elKey)    setSetting('elKey',    elKey.value.trim());
+  if (elVoice)  setSetting('voiceId',  elVoice.value.trim() || CFG.DEF_VOICE);
+  if (ghToken)  setSetting('ghToken',  ghToken.value.trim());
+  if (azKey)    setSetting('azKey',    azKey.value.trim());
+  if (azRegion) setSetting('azRegion', azRegion.value.trim());
   const elSpeed = document.getElementById('el-speed');
   if (elSpeed)  setSetting('speed', elSpeed.value);
 }
@@ -1604,7 +1643,207 @@ const MIC_LABELS = {
 };
 let activeRec = null;
 
+// ── ROUTER: use Azure if key is set, otherwise Web Speech API ──
 function startListening(lang, expectedText, btnEl) {
+  if (getSetting('azKey')) {
+    startListeningAzure(lang, expectedText, btnEl);
+  } else {
+    startListeningWebSpeech(lang, expectedText, btnEl);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// AZURE PRONUNCIATION ASSESSMENT
+// ══════════════════════════════════════════════════════════════
+
+async function startListeningAzure(lang, expectedText, btnEl) {
+  // Tapping while recording → manual stop
+  if (activeRec) {
+    try { activeRec.stop(); } catch {}
+    return;
+  }
+
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+  } catch {
+    showToast('🎤 Mikrofon-Zugriff verweigert – bitte in den Browser-Einstellungen erlauben');
+    return;
+  }
+
+  // Pick the best supported audio format
+  const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus']
+    .find(t => MediaRecorder.isTypeSupported(t)) || '';
+  const mr = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+  const chunks = [];
+
+  mr.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+  mr.onstop = async () => {
+    stream.getTracks().forEach(t => t.stop());
+    activeRec = null;
+    restoreMicBtn(btnEl, lang);
+
+    const blob = new Blob(chunks, { type: mr.mimeType || 'audio/webm' });
+    const fbDiv = document.getElementById('listen-feedback');
+    if (fbDiv) {
+      fbDiv.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-weight:800;">
+        ⏳ Aussprache wird analysiert…</div>`;
+    }
+
+    try {
+      const result = await azurePronounce(blob, expectedText, lang);
+      showAzureFeedback(result, lang);
+    } catch (err) {
+      showToast('⚠️ Azure Fehler: ' + err.message);
+      if (fbDiv) fbDiv.innerHTML = '';
+    }
+  };
+
+  activeRec = mr;
+  mr.start();
+
+  if (btnEl) {
+    btnEl.classList.add('listening');
+    btnEl.innerHTML = '✅ Fertig! (tippe zum Stoppen)';
+  }
+
+  // Live "recording…" preview while speaking
+  const fbDiv = document.getElementById('listen-feedback');
+  if (fbDiv) {
+    fbDiv.innerHTML = `<div style="background:var(--bg);border-radius:10px;padding:12px;
+      font-size:15px;font-weight:800;color:var(--muted);text-align:center;margin-top:12px;
+      animation:pulse 1s ease-in-out infinite alternate;">
+      🔴 Aufnahme läuft… Sprich jetzt!</div>`;
+  }
+
+  // Auto-stop after 15 seconds
+  setTimeout(() => { if (activeRec === mr) { try { mr.stop(); } catch {} } }, 15000);
+}
+
+async function azurePronounce(audioBlob, referenceText, lang) {
+  const key    = getSetting('azKey');
+  const region = getSetting('azRegion', 'westeurope');
+  if (!key) throw new Error('Kein Azure-Key gesetzt');
+
+  const langCode = LANG_CODES[lang] || 'de-DE';
+
+  const paConfig = btoa(JSON.stringify({
+    ReferenceText:      referenceText,
+    GradingSystem:      'HundredMark',
+    Granularity:        'Word',
+    EnableMiscue:       true,
+    Dimension:          'Comprehensive',
+  }));
+
+  const endpoint =
+    `https://${region}.stt.speech.microsoft.com/speech/recognition/conversation/cognitiveservices/v1` +
+    `?language=${langCode}&format=detailed`;
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Ocp-Apim-Subscription-Key': key,
+      'Content-Type':               audioBlob.type || 'audio/webm;codecs=opus',
+      'Pronunciation-Assessment':   paConfig,
+    },
+    body: audioBlob,
+  });
+
+  if (!res.ok) {
+    const txt = await res.text().catch(() => res.status);
+    throw new Error(`Azure ${res.status}: ${txt}`);
+  }
+  return res.json();
+}
+
+function showAzureFeedback(result, lang) {
+  const fb = document.getElementById('listen-feedback');
+  if (!fb) return;
+
+  // Nothing recognized
+  if (result.RecognitionStatus !== 'Success' || !result.NBest?.length) {
+    fb.innerHTML = `<div class="feedback-card">
+      <div class="fb-emoji">💪</div>
+      <div class="fb-msg">Nichts verstanden – nochmal versuchen!</div>
+    </div>`;
+    return;
+  }
+
+  const best = result.NBest[0];
+  const pa   = best.PronunciationAssessment || {};
+  const acc  = Math.round(pa.AccuracyScore     ?? 0);
+  const flu  = Math.round(pa.FluencyScore      ?? 0);
+  const comp = Math.round(pa.CompletenessScore ?? 0);
+  const pros = pa.ProsodyScore != null ? Math.round(pa.ProsodyScore) : null;
+
+  // Stars based on accuracy
+  let emoji, msg, stars;
+  if      (acc >= 85) { emoji='🌟'; msg='Wunderbare Aussprache!';      stars=3; }
+  else if (acc >= 70) { emoji='😊'; msg='Sehr gut! Fast perfekt!';     stars=2; }
+  else if (acc >= 50) { emoji='👍'; msg='Gut gemacht! Weiter so!';     stars=1; }
+  else                { emoji='💪'; msg='Weiter üben! Du schaffst das!'; stars=0; }
+
+  if (stars > 0) { addStars(stars); updateTopStats(); ghSave(); }
+
+  // Per-word coloring
+  const wordHtml = (best.Words || []).map(w => {
+    const wpa = w.PronunciationAssessment || {};
+    const wsc = Math.round(wpa.AccuracyScore ?? 0);
+    const err = wpa.ErrorType;
+    let col;
+    if      (err === 'Omission')  col = '#636E72';  // grey  = missing word
+    else if (err === 'Insertion') col = '#FD79A8';  // pink  = extra word
+    else if (wsc >= 80)           col = '#00B894';  // green = great
+    else if (wsc >= 60)           col = '#e6a817';  // amber = ok
+    else                          col = '#FF7675';  // red   = needs work
+    const title = err && err !== 'None' ? ` title="${err}"` : '';
+    return `<span style="color:${col};font-weight:900;white-space:nowrap"${title}>${h(w.Word)}</span>`;
+  }).join(' ');
+
+  // Score chips
+  const chips = [
+    scoreChip('🎯 Genauigkeit',  acc),
+    scoreChip('⚡ Flüssigkeit',  flu),
+    scoreChip('✅ Vollständig',  comp),
+    pros != null ? scoreChip('🎵 Intonation', pros) : '',
+  ].join('');
+
+  fb.innerHTML = `
+    <div class="feedback-card">
+      <div class="fb-emoji">${emoji}</div>
+      <div class="fb-msg">${msg}</div>
+      <div style="display:grid;grid-template-columns:repeat(${pros != null ? 4 : 3},1fr);gap:8px;margin:14px 0;">
+        ${chips}
+      </div>
+      ${wordHtml ? `
+        <div style="background:var(--bg);border-radius:10px;padding:10px 14px;
+          font-size:17px;line-height:2.2;text-align:center;margin-top:4px;">
+          ${wordHtml}
+        </div>
+        <div style="font-size:11px;color:var(--muted);font-weight:700;text-align:center;margin-top:6px;">
+          🟢 Gut &nbsp;·&nbsp; 🟡 Geht so &nbsp;·&nbsp; 🔴 Üben
+        </div>` : ''}
+      ${stars > 0 ? `<div class="fb-stars">+${stars} ⭐ verdient!</div>` : ''}
+    </div>`;
+
+  if (acc >= 85) setTimeout(launchConfetti, 300);
+}
+
+function scoreChip(label, score) {
+  score = Math.round(score ?? 0);
+  const col = score >= 80 ? '#00B894' : score >= 60 ? '#e6a817' : '#FF7675';
+  return `<div style="background:var(--bg);border-radius:10px;padding:8px 4px;text-align:center;">
+    <div style="font-size:10px;color:var(--muted);font-weight:800;margin-bottom:2px;">${label}</div>
+    <div style="font-size:22px;font-weight:900;color:${col};">${score}%</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// WEB SPEECH API (fallback when no Azure key)
+// ══════════════════════════════════════════════════════════════
+
+function startListeningWebSpeech(lang, expectedText, btnEl) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
     showToast('🎤 Spracherkennung wird von diesem Browser nicht unterstützt (Chrome / Safari empfohlen)');
@@ -1619,16 +1858,14 @@ function startListening(lang, expectedText, btnEl) {
 
   const rec = new SR();
   rec.lang            = LANG_CODES[lang] || 'de-DE';
-  rec.interimResults  = true;   // stream partial results live for instant display
+  rec.interimResults  = true;
   rec.maxAlternatives = 5;
   rec.continuous      = false;
   activeRec = rec;
 
-  // Track best transcript in closure — avoids fragile DOM scraping
   let bestTranscript = '';
   let bestScore      = -1;
 
-  // Button becomes a tap-to-stop button while listening
   if (btnEl) {
     btnEl.classList.add('listening');
     btnEl.innerHTML = '✅ Fertig! (tippe zum Stoppen)';
@@ -1639,20 +1876,17 @@ function startListening(lang, expectedText, btnEl) {
   rec.onresult = e => {
     let interim = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
-      const t   = e.results[i][0].transcript;
       const fin = e.results[i].isFinal;
       if (fin) {
-        // Score all alternatives, keep the best
         for (let j = 0; j < e.results[i].length; j++) {
           const alt = e.results[i][j].transcript;
           const sc  = scoreText(alt, expectedText);
           if (sc > bestScore) { bestScore = sc; bestTranscript = alt; }
         }
       } else {
-        interim += t;
+        interim += e.results[i][0].transcript;
       }
     }
-    // Show live preview while speaking
     const preview = bestTranscript || interim;
     if (fbDiv && preview) {
       fbDiv.innerHTML = `<div style="background:var(--bg);border-radius:10px;padding:12px;
@@ -1661,7 +1895,6 @@ function startListening(lang, expectedText, btnEl) {
     }
   };
 
-  // Fire as soon as speech stops — cuts 2-3 s of silence wait to ~0
   rec.onspeechend = () => { try { rec.stop(); } catch {} };
 
   rec.onerror = e => {
@@ -1678,7 +1911,7 @@ function startListening(lang, expectedText, btnEl) {
     if (bestTranscript) {
       showListenFeedback(bestScore, bestTranscript, lang);
     } else if (fbDiv) {
-      fbDiv.innerHTML = ''; // nothing heard — clear preview
+      fbDiv.innerHTML = '';
     }
   };
 
@@ -1692,14 +1925,11 @@ function restoreMicBtn(btnEl, lang) {
 }
 
 function scoreText(heard, expected) {
-  // Normalise: lowercase, strip punctuation, split to words
   const norm = s => s.toLowerCase()
     .replace(/[^\p{L}\s]/gu, '').trim().split(/\s+/).filter(Boolean);
-
   const hw = norm(heard);
   const ew = norm(expected);
   if (!ew.length) return 0;
-
   let matches = 0;
   const used = new Set();
   for (const w of hw) {
@@ -1715,9 +1945,9 @@ function showListenFeedback(score, heard, lang) {
   if (!fb) return;
 
   let emoji, msg, stars, color;
-  if      (score >= 90) { emoji='🌟'; msg='Perfekt! Wunderbar!';      stars=3; color='#d4a017'; }
-  else if (score >= 70) { emoji='😊'; msg='Fast perfekt! Sehr gut!';  stars=2; color=ST.profile==='seno'?'#FF6B6B':'#A29BFE'; }
-  else if (score >= 45) { emoji='👍'; msg='Gut gemacht! Nochmal?';    stars=1; color='var(--de)'; }
+  if      (score >= 90) { emoji='🌟'; msg='Perfekt! Wunderbar!';           stars=3; color='#d4a017'; }
+  else if (score >= 70) { emoji='😊'; msg='Fast perfekt! Sehr gut!';       stars=2; color=ST.profile==='seno'?'#FF6B6B':'#A29BFE'; }
+  else if (score >= 45) { emoji='👍'; msg='Gut gemacht! Nochmal?';         stars=1; color='var(--de)'; }
   else                  { emoji='💪'; msg='Weiter üben! Du schaffst das!'; stars=0; color='var(--muted)'; }
 
   if (stars > 0) { addStars(stars); updateTopStats(); ghSave(); }
