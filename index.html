@@ -1684,7 +1684,7 @@ async function startListeningAzure(lang, expectedText, btnEl) {
     activeRec = null;
     restoreMicBtn(btnEl, lang);
 
-    const blob = new Blob(chunks, { type: mr.mimeType || 'audio/webm' });
+    const rawBlob = new Blob(chunks, { type: mr.mimeType || 'audio/webm' });
     const fbDiv = document.getElementById('listen-feedback');
     if (fbDiv) {
       fbDiv.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-weight:800;">
@@ -1692,7 +1692,9 @@ async function startListeningAzure(lang, expectedText, btnEl) {
     }
 
     try {
-      const result = await azurePronounce(blob, expectedText, lang);
+      // Convert to 16-bit PCM WAV — Azure Pronunciation Assessment needs this
+      const wavBlob = await blobToWav(rawBlob);
+      const result  = await azurePronounce(wavBlob, expectedText, lang);
       showAzureFeedback(result, lang, expectedText);
     } catch (err) {
       showToast('⚠️ Azure Fehler: ' + err.message);
@@ -1719,6 +1721,53 @@ async function startListeningAzure(lang, expectedText, btnEl) {
 
   // Auto-stop after 15 seconds
   setTimeout(() => { if (activeRec === mr) { try { mr.stop(); } catch {} } }, 15000);
+}
+
+// Convert any browser audio blob → 16-bit mono PCM WAV at 16 kHz
+// Azure Pronunciation Assessment requires this format for reliable results
+async function blobToWav(blob) {
+  const arrayBuffer = await blob.arrayBuffer();
+
+  // Decode the compressed audio (WebM/OGG/MP4) to raw PCM
+  const decodeCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const decoded   = await decodeCtx.decodeAudioData(arrayBuffer);
+  decodeCtx.close();
+
+  // Resample to 16 kHz mono using OfflineAudioContext
+  const TARGET_SR  = 16000;
+  const numSamples = Math.ceil(decoded.duration * TARGET_SR);
+  const offCtx     = new OfflineAudioContext(1, numSamples, TARGET_SR);
+  const src        = offCtx.createBufferSource();
+  src.buffer       = decoded;
+  src.connect(offCtx.destination);
+  src.start(0);
+  const resampled = await offCtx.startRendering();
+  const pcm       = resampled.getChannelData(0);   // Float32 mono
+
+  // Build WAV container (RIFF / fmt  / data)
+  const dataBytes = pcm.length * 2;                // 16-bit = 2 bytes/sample
+  const buf       = new ArrayBuffer(44 + dataBytes);
+  const v         = new DataView(buf);
+  const str       = (off, s) => { for (let i = 0; i < s.length; i++) v.setUint8(off + i, s.charCodeAt(i)); };
+
+  str(0,  'RIFF');  v.setUint32( 4, 36 + dataBytes,   true);
+  str(8,  'WAVE');
+  str(12, 'fmt ');  v.setUint32(16, 16,               true);   // chunk size
+                    v.setUint16(20,  1,               true);   // PCM
+                    v.setUint16(22,  1,               true);   // mono
+                    v.setUint32(24, TARGET_SR,        true);   // sample rate
+                    v.setUint32(28, TARGET_SR * 2,    true);   // byte rate
+                    v.setUint16(32,  2,               true);   // block align
+                    v.setUint16(34, 16,               true);   // bits/sample
+  str(36, 'data');  v.setUint32(40, dataBytes,        true);
+
+  let off = 44;
+  for (let i = 0; i < pcm.length; i++) {
+    const s = Math.max(-1, Math.min(1, pcm[i]));
+    v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+    off += 2;
+  }
+  return new Blob([buf], { type: 'audio/wav' });
 }
 
 async function azurePronounce(audioBlob, referenceText, lang) {
@@ -1775,22 +1824,22 @@ function showAzureFeedback(result, lang, referenceText) {
   }
 
   const best = result.NBest[0];
-  const pa   = best.PronunciationAssessment;
 
-  // If Azure returned a transcript but no pronunciation assessment data,
-  // fall back to the simple word-overlap scoring so we at least show something.
-  if (!pa || pa.AccuracyScore == null) {
+  // Azure returns scores flat on NBest[0]: AccuracyScore, FluencyScore,
+  // CompletenessScore, PronScore (overall). No nested PronunciationAssessment.
+  const acc  = best.AccuracyScore     ?? null;
+  const flu  = best.FluencyScore      ?? null;
+  const comp = best.CompletenessScore ?? null;
+  const pros = best.PronScore         ?? null;   // overall pronunciation score
+
+  // If no scores (Azure didn't hear anything — SNR:0 or all Omissions), fall back
+  if (acc == null || (acc === 0 && flu === 0 && comp === 0)) {
     const heard = best.Display || best.ITN || best.Lexical || '';
-    console.warn('[Azure] No PronunciationAssessment in response — falling back to word overlap scoring. Heard:', heard);
+    console.warn('[Azure] Scores all zero — no speech detected. Heard:', heard || '(nothing)');
     const score = scoreText(heard, referenceText || '');
     showListenFeedback(score, heard, lang);
     return;
   }
-
-  const acc  = Math.round(pa.AccuracyScore);
-  const flu  = Math.round(pa.FluencyScore      ?? acc);
-  const comp = Math.round(pa.CompletenessScore ?? acc);
-  const pros = pa.ProsodyScore != null ? Math.round(pa.ProsodyScore) : null;
 
   // Stars based on accuracy
   let emoji, msg, stars;
@@ -1801,11 +1850,10 @@ function showAzureFeedback(result, lang, referenceText) {
 
   if (stars > 0) { addStars(stars); updateTopStats(); ghSave(); }
 
-  // Per-word coloring
+  // Per-word coloring — scores sit directly on word object (not nested)
   const wordHtml = (best.Words || []).map(w => {
-    const wpa = w.PronunciationAssessment || {};
-    const wsc = Math.round(wpa.AccuracyScore ?? 0);
-    const err = wpa.ErrorType;
+    const wsc = Math.round(w.AccuracyScore ?? 0);
+    const err = w.ErrorType;
     let col;
     if      (err === 'Omission')  col = '#636E72';  // grey  = missing word
     else if (err === 'Insertion') col = '#FD79A8';  // pink  = extra word
@@ -1816,19 +1864,20 @@ function showAzureFeedback(result, lang, referenceText) {
     return `<span style="color:${col};font-weight:900;white-space:nowrap"${title}>${h(w.Word)}</span>`;
   }).join(' ');
 
-  // Score chips
+  // Score chips — show up to 4: accuracy, fluency, completeness, overall
   const chips = [
-    scoreChip('🎯 Genauigkeit',  acc),
-    scoreChip('⚡ Flüssigkeit',  flu),
-    scoreChip('✅ Vollständig',  comp),
-    pros != null ? scoreChip('🎵 Intonation', pros) : '',
+    scoreChip('🎯 Genauigkeit',   Math.round(acc)),
+    scoreChip('⚡ Flüssigkeit',   Math.round(flu  ?? acc)),
+    scoreChip('✅ Vollständig',   Math.round(comp ?? acc)),
+    pros != null ? scoreChip('⭐ Gesamt',     Math.round(pros)) : '',
   ].join('');
+  const cols = pros != null ? 4 : 3;
 
   fb.innerHTML = `
     <div class="feedback-card">
       <div class="fb-emoji">${emoji}</div>
       <div class="fb-msg">${msg}</div>
-      <div style="display:grid;grid-template-columns:repeat(${pros != null ? 4 : 3},1fr);gap:8px;margin:14px 0;">
+      <div style="display:grid;grid-template-columns:repeat(${cols},1fr);gap:8px;margin:14px 0;">
         ${chips}
       </div>
       ${wordHtml ? `
