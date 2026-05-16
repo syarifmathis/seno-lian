@@ -1693,7 +1693,7 @@ async function startListeningAzure(lang, expectedText, btnEl) {
 
     try {
       const result = await azurePronounce(blob, expectedText, lang);
-      showAzureFeedback(result, lang);
+      showAzureFeedback(result, lang, expectedText);
     } catch (err) {
       showToast('⚠️ Azure Fehler: ' + err.message);
       if (fbDiv) fbDiv.innerHTML = '';
@@ -1728,7 +1728,9 @@ async function azurePronounce(audioBlob, referenceText, lang) {
 
   const langCode = LANG_CODES[lang] || 'de-DE';
 
-  const paConfig = btoa(JSON.stringify({
+  // Use unicode-safe base64 — plain btoa() breaks on German umlauts (ä/ö/ü/ß)
+  // because it encodes as Latin-1 bytes, but Azure expects UTF-8
+  const paConfig = b64enc(JSON.stringify({
     ReferenceText:      referenceText,
     GradingSystem:      'HundredMark',
     Granularity:        'Word',
@@ -1754,10 +1756,12 @@ async function azurePronounce(audioBlob, referenceText, lang) {
     const txt = await res.text().catch(() => res.status);
     throw new Error(`Azure ${res.status}: ${txt}`);
   }
-  return res.json();
+  const json = await res.json();
+  console.log('[Azure Pronunciation Assessment] response:', JSON.stringify(json, null, 2));
+  return json;
 }
 
-function showAzureFeedback(result, lang) {
+function showAzureFeedback(result, lang, referenceText) {
   const fb = document.getElementById('listen-feedback');
   if (!fb) return;
 
@@ -1771,10 +1775,21 @@ function showAzureFeedback(result, lang) {
   }
 
   const best = result.NBest[0];
-  const pa   = best.PronunciationAssessment || {};
-  const acc  = Math.round(pa.AccuracyScore     ?? 0);
-  const flu  = Math.round(pa.FluencyScore      ?? 0);
-  const comp = Math.round(pa.CompletenessScore ?? 0);
+  const pa   = best.PronunciationAssessment;
+
+  // If Azure returned a transcript but no pronunciation assessment data,
+  // fall back to the simple word-overlap scoring so we at least show something.
+  if (!pa || pa.AccuracyScore == null) {
+    const heard = best.Display || best.ITN || best.Lexical || '';
+    console.warn('[Azure] No PronunciationAssessment in response — falling back to word overlap scoring. Heard:', heard);
+    const score = scoreText(heard, referenceText || '');
+    showListenFeedback(score, heard, lang);
+    return;
+  }
+
+  const acc  = Math.round(pa.AccuracyScore);
+  const flu  = Math.round(pa.FluencyScore      ?? acc);
+  const comp = Math.round(pa.CompletenessScore ?? acc);
   const pros = pa.ProsodyScore != null ? Math.round(pa.ProsodyScore) : null;
 
   // Stars based on accuracy
